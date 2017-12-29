@@ -1,0 +1,10 @@
+int a=5;
+float b=6.3;
+boolean c=True;
+string d="cyka";
+print a;
+print b;
+print c;
+print d;
+d="blyat";
+print d;

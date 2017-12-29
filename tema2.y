@@ -7,6 +7,8 @@ int yylex();
 int yyerror(const char *msg);
 int EsteCorecta = 1;
 char msg[500];
+char types[4][10]={"boolean","float","int","string"};
+
 
 class TVAR
 {
@@ -301,12 +303,13 @@ GenericValue* gv=new GenericValue();
 
 %union { char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;}
 
-%token TOK_PROGRAM TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_NEQ TOK_EQU TOK_GTR TOK_LSS TOK_LEQ TOK_GEQ TOK_BEGIN TOK_END TOK_REPEAT TOK_UNTIL TOK_IF TOK_ELSE TOK_BOOL TOK_INT TOK_FLOAT TOK_STRING TOK_PRINT TOK_ERROR
+%token TOK_PROGRAM TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_NEQ TOK_EQU TOK_GTR TOK_LSS TOK_LEQ TOK_GEQ TOK_BEGIN TOK_END TOK_REPEAT TOK_UNTIL TOK_IF TOK_ELSE TOK_PRINT TOK_ERROR
 %token <val_int> TOK_INT_VALUE
 %token <val_float> TOK_FLOAT_VALUE
 %token <val_bool> TOK_TRUE
 %token <val_bool> TOK_FALSE
 %token <val_string> TOK_STRING_VALUE
+%token <val_int> TOK_DATA_TYPE
 %token <name> TOK_VARIABLE
 
 %type <val_int> E_I
@@ -328,87 +331,38 @@ S :
     error ';' S
        { EsteCorecta = 0; }
     ;
-I : TOK_VARIABLE '=' E_I
-{
-	if(ts != NULL)
+I : TOK_VARIABLE '=' E_BFIS
 	{
-		if(ts->exists($1) == 1)
-	  	{
-			if(ts->getType($1)==2)
-			{
-				ts->setValue($1, $3);
-			}
-	    	else
-	    	{
-	    		sprintf(msg,"%d:%d Eroare semantica: Variabilei %s nu i se poate atribui o valoare de tip int", @1.first_line, @1.first_column, $1);
-	    		yyerror(msg);
-	    		YYERROR;
-	    	}
-	  }
-	  else
-	  {
-	    	sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-	    	yyerror(msg);
-	    	YYERROR;
-	  }
-	}
-	else
-	{
-	  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-	  yyerror(msg);
-	  YYERROR;
-	}
-      }
-	|
-	TOK_VARIABLE '=' E_F
-    {
-	if(ts != NULL)
-	{
-	  if(ts->exists($1) == 1)
-	  {
-	    if(ts->getType($1)==1)
-		{
-			ts->setValue($1, $3);
-		}
-	    else
-	    {
-	    	sprintf(msg,"%d:%d Eroare semantica: Variabilei %s nu i se poate atribui o valoare de tip float", @1.first_line, @1.first_column, $1);
-	    	yyerror(msg);
-	    	YYERROR;
-	    }
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-	  yyerror(msg);
-	  YYERROR;
-	}
-    }
-    |
-	TOK_VARIABLE '=' E_B
-    {
 		if(ts != NULL)
 		{
 			if(ts->exists($1) == 1)
-			{
-				if(ts->getType($1)==0)
+		  	{
+		  		if(ts->getType($1)==$3->getType())
 				{
-					ts->setValue($1, $3);
+					if(ts->getType($1)==0)
+					{
+						ts->setValue($1, *(bool*)$3->getValue());
+					}
+					if(ts->getType($1)==1)
+					{
+						ts->setValue($1, *(float*)$3->getValue());
+					}
+					if(ts->getType($1)==2)
+					{
+						ts->setValue($1, *(int*)$3->getValue());
+					}
+					if(ts->getType($1)==3)
+					{
+						ts->setValue($1, *(char**)$3->getValue());
+					}
 				}
 				else
 				{
-					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s nu i se poate atribui o valoare de tip bool", @1.first_line, @1.first_column, $1);
+					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip %s", @1.first_line, @1.first_column, $1, types[ts->getType($1)], types[$3->getType()]);
 					yyerror(msg);
 					YYERROR;
-				}
-			}
+				}					
+		  	}
 			else
 			{
 				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
@@ -418,215 +372,138 @@ I : TOK_VARIABLE '=' E_I
 		}
 		else
 		{
-		  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-		  yyerror(msg);
-		  YYERROR;
+			sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+			yyerror(msg);
+			YYERROR;
 		}
-    }
-    |
-	TOK_VARIABLE '=' E_S
+	}
+	|
+    TOK_DATA_TYPE TOK_VARIABLE '=' E_BFIS
     {
-		if(ts != NULL)
-		{
-			if(ts->exists($1) == 1)
+	if(ts != NULL)
+	{
+	  if(ts->exists($2) == 0)
+	  {
+	    ts->add($2, $1);
+	    
+	    if($1==0)
+	    {
+	    	if($4->getType()==0)
 			{
-				if(ts->getType($1)==3)
-				{
-					ts->setValue($1, $3);
-				}
-				else
-				{
-					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s nu i se poate atribui o valoare de tip string", @1.first_line, @1.first_column, $1);
-					yyerror(msg);
-					YYERROR;
-				}
+				ts->setValue($2, *(bool*)$4->getValue());
 			}
 			else
 			{
-				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat bool!", @1.first_line, @1.first_column, $2);
 				yyerror(msg);
-				YYERROR;
+				YYERROR;  
 			}
-		}
-		else
-		{
-		  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-		  yyerror(msg);
-		  YYERROR;
-		}
+	    }
+	    if($1==1)
+	    {
+	    	if($4->getType()==1)
+			{
+				ts->setValue($2, *(float*)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	    if($1==2)
+	    {
+	    	if($4->getType()==2)
+			{
+				ts->setValue($2, *(int*)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	    if($1==3)
+	    {
+	    	if($4->getType()==3)
+			{
+				ts->setValue($2, *(char**)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat string!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	  }
+	  else
+	  {
+	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
+	    yyerror(msg);
+	    YYERROR;
+	  }
+	}
+	else
+	{
+	  ts = new TVAR();
+	  ts->add($2, $1);
+	    if($1==0)
+	    {
+	    	if($4->getType()==0)
+			{
+				ts->setValue($2, *(bool*)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat bool!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	    if($1==1)
+	    {
+	    	if($4->getType()==1)
+			{
+				ts->setValue($2, *(float*)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	    if($1==2)
+	    {
+	    	if($4->getType()==2)
+			{
+				ts->setValue($2, *(int*)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	    if($1==3)
+	    {
+	    	if($4->getType()==3)
+			{
+				ts->setValue($2, *(char**)$4->getValue());
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat string!", @1.first_line, @1.first_column, $2);
+				yyerror(msg);
+				YYERROR;  
+			}
+	    }
+	}
     }
-    |
-    TOK_INT TOK_VARIABLE
-	{
-		if(ts != NULL)
-		{
-	  		if(ts->exists($2) == 0)
-	  		{
-	    		ts->add($2, 2);
-	  		}
-	  		else
-	  		{
-	    		sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    		yyerror(msg);
-	    		YYERROR;
-	  		}
-		}
-		else
-		{
-	  		ts = new TVAR();
-	  		ts->add($2, 2);
-		}
-      }
-	|
-    TOK_INT TOK_VARIABLE '=' E_BFIS
-    {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 0)
-	  {
-	    ts->add($2, 2);
-	    if($4->getType()==2)
-	    {
-	    	ts->setValue($2, *(int*)$4->getValue());
-	    }
-	    else
-	    {
-			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
-	    	yyerror(msg);
-	    	YYERROR;  
-	    }
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  ts = new TVAR();
-	  ts->add($2, 2);
-	  if($4->getType()==2)
-	    {
-	    	ts->setValue($2, *(int*)$4->getValue());
-	    }
-	    else
-	    {
-			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
-	    	yyerror(msg);
-	    	YYERROR;  
-	    }
-	}
-      }
-     |
-    TOK_FLOAT TOK_VARIABLE '=' E_BFIS
-    {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 0)
-	  {
-	    ts->add($2, 1);
-	    if($4->getType()==1)
-	    {
-	    	ts->setValue($2, *(float*)$4->getValue());
-	    }
-	    else
-	    {
-			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
-	    	yyerror(msg);
-	    	YYERROR;  
-	    }
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  ts = new TVAR();
-	  ts->add($2, 1);
-	  if($4->getType()==1)
-	    {
-	    	ts->setValue($2, *(float*)$4->getValue());
-	    }
-	    else
-	    {
-			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
-	    	yyerror(msg);
-	    	YYERROR;  
-	    }
-	}
-      }
-	|
-	TOK_FLOAT TOK_VARIABLE
-      {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 0)
-	  {
-	    ts->add($2, 1);
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  ts = new TVAR();
-	  ts->add($2, 1);
-	}
-      }
-	|
-	TOK_BOOL TOK_VARIABLE
-      {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 0)
-	  {
-	    ts->add($2, 0);
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  ts = new TVAR();
-	  ts->add($2, 0);
-	}
-      }
-      |
-	TOK_STRING TOK_VARIABLE
-      {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 0)
-	  {
-	    ts->add($2, 3);
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
-	}
-	else
-	{
-	  ts = new TVAR();
-	  ts->add($2, 3);
-	}
-      }
 	|
     TOK_PRINT TOK_VARIABLE
       {
@@ -687,16 +564,6 @@ E_BFIS: E_B{$$ = new GenericValue();$$->setValue($1);}
 	|
 	E_S{$$ = new GenericValue();$$->setValue($1);}
 	;
-DTP: TOK_INT_VALUE{}
-	|
-	TOK_FLOAT_VALUE{}
-	|
-	TOK_TRUE{}
-	|
-	TOK_FALSE{}
-	|
-	TOK_STRING_VALUE{}
-	;
 E_I : E_I TOK_PLUS E_I { $$ = $1 + $3; }
     |
     E_I TOK_MINUS E_I { $$ = $1 - $3; }
@@ -720,38 +587,6 @@ E_I : E_I TOK_PLUS E_I { $$ = $1 + $3; }
     }
     |
     TOK_INT_VALUE { $$ = $1; }
-    |
-    TOK_VARIABLE 
-	{
-		if(ts != NULL)
-		{
-			if(ts->exists($1) == 1)
-			{
-				if(ts->getType($1)==2)
-				{
-					$$ = *(int*)ts->getValue($1);
-				}
-				else
-				{
-					sprintf(msg,"%d:%d Eroare semantica: Variabila %s trebuie sa fie de tip int", @1.first_line, @1.first_column, $1);
-					yyerror(msg);
-					YYERROR;
-				}
-			}
-			else
-			{
-				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-				yyerror(msg);
-				YYERROR;
-			}
-		}
-		else
-		{
-		  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
-		  yyerror(msg);
-		  YYERROR;
-		}
-	}
     ;
 E_F : E_F TOK_PLUS E_F { $$ = $1 + $3; }
     |

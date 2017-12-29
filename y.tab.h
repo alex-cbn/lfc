@@ -64,18 +64,15 @@ extern int yydebug;
     TOK_UNTIL = 274,
     TOK_IF = 275,
     TOK_ELSE = 276,
-    TOK_BOOL = 277,
-    TOK_INT = 278,
-    TOK_FLOAT = 279,
-    TOK_STRING = 280,
-    TOK_PRINT = 281,
-    TOK_ERROR = 282,
-    TOK_INT_VALUE = 283,
-    TOK_FLOAT_VALUE = 284,
-    TOK_TRUE = 285,
-    TOK_FALSE = 286,
-    TOK_STRING_VALUE = 287,
-    TOK_VARIABLE = 288
+    TOK_PRINT = 277,
+    TOK_ERROR = 278,
+    TOK_INT_VALUE = 279,
+    TOK_FLOAT_VALUE = 280,
+    TOK_TRUE = 281,
+    TOK_FALSE = 282,
+    TOK_STRING_VALUE = 283,
+    TOK_DATA_TYPE = 284,
+    TOK_VARIABLE = 285
   };
 #endif
 /* Tokens.  */
@@ -98,28 +95,25 @@ extern int yydebug;
 #define TOK_UNTIL 274
 #define TOK_IF 275
 #define TOK_ELSE 276
-#define TOK_BOOL 277
-#define TOK_INT 278
-#define TOK_FLOAT 279
-#define TOK_STRING 280
-#define TOK_PRINT 281
-#define TOK_ERROR 282
-#define TOK_INT_VALUE 283
-#define TOK_FLOAT_VALUE 284
-#define TOK_TRUE 285
-#define TOK_FALSE 286
-#define TOK_STRING_VALUE 287
-#define TOK_VARIABLE 288
+#define TOK_PRINT 277
+#define TOK_ERROR 278
+#define TOK_INT_VALUE 279
+#define TOK_FLOAT_VALUE 280
+#define TOK_TRUE 281
+#define TOK_FALSE 282
+#define TOK_STRING_VALUE 283
+#define TOK_DATA_TYPE 284
+#define TOK_VARIABLE 285
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 302 "tema2.y" /* yacc.c:1909  */
+#line 304 "tema2.y" /* yacc.c:1909  */
  char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;
 
-#line 123 "y.tab.h" /* yacc.c:1909  */
+#line 117 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

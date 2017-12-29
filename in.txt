@@ -1,8 +1,4 @@
-int a=5;
-float b=6.3;
-int c=True;
-int d="cyka";
+float a=6.7;
 print a;
-print b;
-print c;
-print d;
+float a1=a;
+print a1;
