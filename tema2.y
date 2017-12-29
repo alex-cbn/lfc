@@ -222,10 +222,84 @@ int TVAR::isInitialized(char* n)
 }
 
 TVAR* ts = NULL;
+class GenericValue
+{
+	int tip;
+	int val_int;
+	bool val_bool;
+	float val_float;
+	char* val_string;
+
+public:
+	GenericValue();
+	void* getValue();
+	int getType();
+	void setValue(int v);
+	void setValue(float v);
+	void setValue(bool v);
+	void setValue(char* v);
+};
+
+GenericValue::GenericValue()
+{
+	tip=-1;
+}
+
+void* GenericValue::getValue()
+{
+	if (this->tip == 0)
+	{
+		return (void*)&(this->val_bool);
+	}
+	if (this->tip == 1)
+	{
+		return (void*)&(this->val_float);
+	}
+	if (this->tip == 2)
+	{
+		return (void*)&(this->val_int);
+	}
+	if (this->tip == 3)
+	{
+		return (void*)&(this->val_string);
+	}
+}
+
+int GenericValue::getType()
+{
+	return this->tip;
+}
+
+void GenericValue::setValue(int v)
+{
+	this->val_int = v;
+	this->tip = 2;
+}
+
+void GenericValue::setValue(float v)
+{
+	this->val_float = v;
+	this->tip = 1;
+}
+
+void GenericValue::setValue(bool v)
+{
+	this->val_bool = v;
+	this->tip = 0;
+}
+
+void GenericValue::setValue(char* v)
+{
+	this->val_string = new char[strlen(v) + 1];
+	strcpy(this->val_string, v);
+	this->tip = 3;
+}
+GenericValue* gv=new GenericValue();
+
 %}
 
 
-%union { char* name; bool val_bool;int val_int; float val_float; char* val_string;}
+%union { char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;}
 
 %token TOK_PROGRAM TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_NEQ TOK_EQU TOK_GTR TOK_LSS TOK_LEQ TOK_GEQ TOK_BEGIN TOK_END TOK_REPEAT TOK_UNTIL TOK_IF TOK_ELSE TOK_BOOL TOK_INT TOK_FLOAT TOK_STRING TOK_PRINT TOK_ERROR
 %token <val_int> TOK_INT_VALUE
@@ -239,6 +313,7 @@ TVAR* ts = NULL;
 %type <val_float> E_F
 %type <val_bool> E_B
 %type <val_string> E_S
+%type <val_generic> E_BFIS
 
 %start S
 
@@ -403,14 +478,23 @@ I : TOK_VARIABLE '=' E_I
 		}
       }
 	|
-    TOK_INT TOK_VARIABLE '=' E_I
+    TOK_INT TOK_VARIABLE '=' E_BFIS
     {
 	if(ts != NULL)
 	{
 	  if(ts->exists($2) == 0)
 	  {
 	    ts->add($2, 2);
-	    ts->setValue($2, $4);
+	    if($4->getType()==2)
+	    {
+	    	ts->setValue($2, *(int*)$4->getValue());
+	    }
+	    else
+	    {
+			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
+	    	yyerror(msg);
+	    	YYERROR;  
+	    }
 	  }
 	  else
 	  {
@@ -423,7 +507,58 @@ I : TOK_VARIABLE '=' E_I
 	{
 	  ts = new TVAR();
 	  ts->add($2, 2);
-	  ts->setValue($2, $4);
+	  if($4->getType()==2)
+	    {
+	    	ts->setValue($2, *(int*)$4->getValue());
+	    }
+	    else
+	    {
+			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat int!", @1.first_line, @1.first_column, $2);
+	    	yyerror(msg);
+	    	YYERROR;  
+	    }
+	}
+      }
+     |
+    TOK_FLOAT TOK_VARIABLE '=' E_BFIS
+    {
+	if(ts != NULL)
+	{
+	  if(ts->exists($2) == 0)
+	  {
+	    ts->add($2, 1);
+	    if($4->getType()==1)
+	    {
+	    	ts->setValue($2, *(float*)$4->getValue());
+	    }
+	    else
+	    {
+			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
+	    	yyerror(msg);
+	    	YYERROR;  
+	    }
+	  }
+	  else
+	  {
+	    sprintf(msg,"%d:%d Eroare semantica: Declaratii multiple pentru variabila %s!", @1.first_line, @1.first_column, $2);
+	    yyerror(msg);
+	    YYERROR;
+	  }
+	}
+	else
+	{
+	  ts = new TVAR();
+	  ts->add($2, 1);
+	  if($4->getType()==1)
+	    {
+	    	ts->setValue($2, *(float*)$4->getValue());
+	    }
+	    else
+	    {
+			sprintf(msg,"%d:%d Variabilei %s nu i se poate atrbui o alta valoare decat float!", @1.first_line, @1.first_column, $2);
+	    	yyerror(msg);
+	    	YYERROR;  
+	    }
 	}
       }
 	|
@@ -541,8 +676,27 @@ I : TOK_VARIABLE '=' E_I
 	  yyerror(msg);
 	  YYERROR;
 	}
-      }
+	
+}
     ;
+E_BFIS: E_B{$$ = new GenericValue();$$->setValue($1);}
+	|
+	E_I{$$ = new GenericValue();$$->setValue($1);}
+	|
+	E_F{$$ = new GenericValue();$$->setValue($1);}
+	|
+	E_S{$$ = new GenericValue();$$->setValue($1);}
+	;
+DTP: TOK_INT_VALUE{}
+	|
+	TOK_FLOAT_VALUE{}
+	|
+	TOK_TRUE{}
+	|
+	TOK_FALSE{}
+	|
+	TOK_STRING_VALUE{}
+	;
 E_I : E_I TOK_PLUS E_I { $$ = $1 + $3; }
     |
     E_I TOK_MINUS E_I { $$ = $1 - $3; }
