@@ -749,7 +749,7 @@ union yyalloc
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  8
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  27
+#define YYNRULES  28
 /* YYNSTATES -- Number of states.  */
 #define YYNSTATES  52
 
@@ -800,9 +800,9 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   327,   327,   329,   331,   334,   381,   509,   560,   562,
-     564,   566,   568,   570,   572,   574,   585,   590,   592,   594,
-     596,   598,   609,   614,   616,   621,   623,   625
+       0,   327,   327,   329,   331,   334,   381,   508,   530,   581,
+     583,   585,   587,   589,   591,   593,   595,   606,   611,   613,
+     615,   617,   619,   630,   635,   637,   642,   644,   646
 };
 #endif
 
@@ -860,12 +860,12 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     0,     0,     7,     0,
-       0,     1,     0,     4,     0,     0,    17,    23,    25,    26,
-      27,     5,     9,    10,     8,    11,     3,     6,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    16,
-      22,    24,     0,    12,    13,    14,    15,     0,    18,    19,
-      20,    21
+       0,     0,     0,     0,     0,     0,     0,     0,     8,     7,
+       0,     1,     0,     4,     0,     0,    18,    24,    26,    27,
+      28,     5,    10,    11,     9,    12,     3,     6,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    17,
+      23,    25,     0,    13,    14,    15,    16,     0,    19,    20,
+      21,    22
 };
 
   /* YYPGOTO[NTERM-NUM].  */
@@ -920,17 +920,17 @@ static const yytype_uint8 yystos[] =
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    33,    34,    34,    34,    35,    35,    35,    36,    36,
-      36,    36,    37,    37,    37,    37,    37,    37,    38,    38,
-      38,    38,    38,    38,    39,    39,    39,    40
+       0,    33,    34,    34,    34,    35,    35,    35,    35,    36,
+      36,    36,    36,    37,    37,    37,    37,    37,    37,    38,
+      38,    38,    38,    38,    38,    39,    39,    39,    40
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     3,     3,     3,     4,     2,     1,     1,
-       1,     1,     3,     3,     3,     3,     3,     1,     3,     3,
-       3,     3,     3,     1,     3,     1,     1,     1
+       0,     2,     0,     3,     3,     3,     4,     2,     2,     1,
+       1,     1,     1,     3,     3,     3,     3,     3,     1,     3,
+       3,     3,     3,     3,     1,     3,     1,     1,     1
 };
 
 
@@ -1828,7 +1828,6 @@ yyreduce:
 	{
 	  ts = new TVAR();
 	  ts->add((yyvsp[-2].name), (yyvsp[-3].val_int));
-	    
 	    if((yyvsp[-3].val_int)==0)
 	    {
 	    	if((yyvsp[0].val_generic)->getType()==0)
@@ -1883,11 +1882,36 @@ yyreduce:
 	    }
 	}
     }
-#line 1887 "y.tab.c" /* yacc.c:1646  */
+#line 1886 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 510 "tema2.y" /* yacc.c:1646  */
+#line 509 "tema2.y" /* yacc.c:1646  */
+    {
+    if(ts != NULL)
+    {
+    	if(ts->exists((yyvsp[0].name))==1)
+    	{
+    		sprintf(msg,"%d:%d Variabila %s a fost declarata deja..", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
+			yyerror(msg);
+			YYERROR;  
+    	}
+    	else
+    	{
+    		ts->add((yyvsp[0].name), (yyvsp[-1].val_int));
+    	}
+    }
+    else
+    {
+    	ts = new TVAR();
+    	ts->add((yyvsp[0].name), (yyvsp[-1].val_int));
+    }
+    }
+#line 1911 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 531 "tema2.y" /* yacc.c:1646  */
     {
 	if(ts != NULL)
 	{
@@ -1937,53 +1961,53 @@ yyreduce:
 	}
 	
 }
-#line 1941 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 8:
-#line 560 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_bool));}
-#line 1947 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 9:
-#line 562 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_int));}
-#line 1953 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 10:
-#line 564 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
-#line 1959 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 11:
-#line 566 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
 #line 1965 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 12:
-#line 568 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) + (yyvsp[0].val_int); }
+  case 9:
+#line 581 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_bool));}
 #line 1971 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 13:
-#line 570 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) - (yyvsp[0].val_int); }
+  case 10:
+#line 583 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_int));}
 #line 1977 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 14:
-#line 572 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) * (yyvsp[0].val_int); }
+  case 11:
+#line 585 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
 #line 1983 "y.tab.c" /* yacc.c:1646  */
     break;
 
+  case 12:
+#line 587 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
+#line 1989 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 13:
+#line 589 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_int) = (yyvsp[-2].val_int) + (yyvsp[0].val_int); }
+#line 1995 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 591 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_int) = (yyvsp[-2].val_int) - (yyvsp[0].val_int); }
+#line 2001 "y.tab.c" /* yacc.c:1646  */
+    break;
+
   case 15:
-#line 575 "tema2.y" /* yacc.c:1646  */
+#line 593 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_int) = (yyvsp[-2].val_int) * (yyvsp[0].val_int); }
+#line 2007 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 596 "tema2.y" /* yacc.c:1646  */
     { 
 	  if((yyvsp[0].val_int) == 0) 
 	  { 
@@ -1993,43 +2017,43 @@ yyreduce:
 	  } 
 	  else { (yyval.val_int) = (yyvsp[-2].val_int) / (yyvsp[0].val_int); } 
 	}
-#line 1997 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 16:
-#line 586 "tema2.y" /* yacc.c:1646  */
-    {
-	(yyval.val_int) = (yyvsp[-1].val_int);
-    }
-#line 2005 "y.tab.c" /* yacc.c:1646  */
+#line 2021 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 590 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[0].val_int); }
-#line 2011 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 18:
-#line 592 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) + (yyvsp[0].val_float); }
-#line 2017 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 19:
-#line 594 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) - (yyvsp[0].val_float); }
-#line 2023 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 20:
-#line 596 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) * (yyvsp[0].val_float); }
+#line 607 "tema2.y" /* yacc.c:1646  */
+    {
+	(yyval.val_int) = (yyvsp[-1].val_int);
+    }
 #line 2029 "y.tab.c" /* yacc.c:1646  */
     break;
 
+  case 18:
+#line 611 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_int) = (yyvsp[0].val_int); }
+#line 2035 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 613 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_float) = (yyvsp[-2].val_float) + (yyvsp[0].val_float); }
+#line 2041 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 615 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_float) = (yyvsp[-2].val_float) - (yyvsp[0].val_float); }
+#line 2047 "y.tab.c" /* yacc.c:1646  */
+    break;
+
   case 21:
-#line 599 "tema2.y" /* yacc.c:1646  */
+#line 617 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_float) = (yyvsp[-2].val_float) * (yyvsp[0].val_float); }
+#line 2053 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 620 "tema2.y" /* yacc.c:1646  */
     { 
 	  if((yyvsp[0].val_float) == (float)0) 
 	  { 
@@ -2039,53 +2063,53 @@ yyreduce:
 	  } 
 	  else { (yyval.val_float) = (yyvsp[-2].val_float) / (yyvsp[0].val_float); } 
 	}
-#line 2043 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 22:
-#line 610 "tema2.y" /* yacc.c:1646  */
-    {
-	(yyval.val_float) = (yyvsp[-1].val_float);
-    }
-#line 2051 "y.tab.c" /* yacc.c:1646  */
+#line 2067 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 614 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[0].val_float); }
-#line 2057 "y.tab.c" /* yacc.c:1646  */
+#line 631 "tema2.y" /* yacc.c:1646  */
+    {
+	(yyval.val_float) = (yyvsp[-1].val_float);
+    }
+#line 2075 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 617 "tema2.y" /* yacc.c:1646  */
-    {
-	(yyval.val_bool) = (yyvsp[-1].val_bool);
-    }
-#line 2065 "y.tab.c" /* yacc.c:1646  */
+#line 635 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_float) = (yyvsp[0].val_float); }
+#line 2081 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 621 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_bool) = (yyvsp[0].val_bool); }
-#line 2071 "y.tab.c" /* yacc.c:1646  */
+#line 638 "tema2.y" /* yacc.c:1646  */
+    {
+	(yyval.val_bool) = (yyvsp[-1].val_bool);
+    }
+#line 2089 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 623 "tema2.y" /* yacc.c:1646  */
+#line 642 "tema2.y" /* yacc.c:1646  */
     { (yyval.val_bool) = (yyvsp[0].val_bool); }
-#line 2077 "y.tab.c" /* yacc.c:1646  */
+#line 2095 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 626 "tema2.y" /* yacc.c:1646  */
+#line 644 "tema2.y" /* yacc.c:1646  */
+    { (yyval.val_bool) = (yyvsp[0].val_bool); }
+#line 2101 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 28:
+#line 647 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_string) = (yyvsp[0].val_string);
 	}
-#line 2085 "y.tab.c" /* yacc.c:1646  */
+#line 2109 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2089 "y.tab.c" /* yacc.c:1646  */
+#line 2113 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2320,7 +2344,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 631 "tema2.y" /* yacc.c:1906  */
+#line 652 "tema2.y" /* yacc.c:1906  */
 
 
 int main()

@@ -504,6 +504,28 @@ I : TOK_VARIABLE '=' E_BFIS
 	    }
 	}
     }
+    |
+    TOK_DATA_TYPE TOK_VARIABLE
+    {
+    if(ts != NULL)
+    {
+    	if(ts->exists($2)==1)
+    	{
+    		sprintf(msg,"%d:%d Variabila %s a fost declarata deja..", @1.first_line, @1.first_column, $2);
+			yyerror(msg);
+			YYERROR;  
+    	}
+    	else
+    	{
+    		ts->add($2, $1);
+    	}
+    }
+    else
+    {
+    	ts = new TVAR();
+    	ts->add($2, $1);
+    }
+    }
 	|
     TOK_PRINT TOK_VARIABLE
       {
