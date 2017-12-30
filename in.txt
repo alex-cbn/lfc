@@ -1,4 +1,14 @@
-float a=6.7;
+program kurwa
+begin
+int zi=0;
+float zf=0.0;
+print zi;
+print zf;
+int a=5/2;
+int c=5/zi;
+int d=5/zf;
 print a;
-float a1=a;
-print a1;
+print b;
+print c;
+print d;
+end

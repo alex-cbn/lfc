@@ -303,7 +303,7 @@ GenericValue* gv=new GenericValue();
 
 %union { char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;}
 
-%token TOK_PROGRAM TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_NEQ TOK_EQU TOK_GTR TOK_LSS TOK_LEQ TOK_GEQ TOK_BEGIN TOK_END TOK_REPEAT TOK_UNTIL TOK_IF TOK_ELSE TOK_PRINT TOK_ERROR
+%token TOK_PROGRAM TOK_PLUS TOK_MINUS TOK_MULTIPLY TOK_DIVIDE TOK_LEFT TOK_RIGHT TOK_NEQ TOK_EQU TOK_GTR TOK_LSS TOK_LEQ TOK_GEQ TOK_BEGIN TOK_END TOK_REPEAT TOK_UNTIL TOK_IF TOK_ELSE TOK_PRINT TOK_ERROR TOK_THEN ifx
 %token <val_int> TOK_INT_VALUE
 %token <val_float> TOK_FLOAT_VALUE
 %token <val_bool> TOK_TRUE
@@ -312,26 +312,37 @@ GenericValue* gv=new GenericValue();
 %token <val_int> TOK_DATA_TYPE
 %token <name> TOK_VARIABLE
 
-%type <val_int> E_I
-%type <val_float> E_F
-%type <val_bool> E_B
-%type <val_string> E_S
 %type <val_generic> E_BFIS
+%type <val_bool> BOOLE
 
 %start S
 
 %left TOK_PLUS TOK_MINUS
 %left TOK_MULTIPLY TOK_DIVIDE
 
+%nonassoc ifx
+%nonassoc TOK_ELSE
+
 %%
+
 S : 
     |
-    I ';' S
+    TOK_PROGRAM TOK_VARIABLE B
     | 
     error ';' S
        { EsteCorecta = 0; }
     ;
-I : TOK_VARIABLE '=' E_BFIS
+B : TOK_BEGIN INST TOK_END
+	;
+INST: 
+	|
+	I ';' INST
+	;
+I : IFDECL
+	|
+	REPUNTIL
+	|
+	TOK_VARIABLE '=' E_BFIS
 	{
 		if(ts != NULL)
 		{
@@ -528,7 +539,7 @@ I : TOK_VARIABLE '=' E_BFIS
     }
 	|
     TOK_PRINT TOK_VARIABLE
-      {
+    {
 	if(ts != NULL)
 	{
 	  if(ts->exists($2) == 1)
@@ -578,74 +589,467 @@ I : TOK_VARIABLE '=' E_BFIS
 	
 }
     ;
-E_BFIS: E_B{$$ = new GenericValue();$$->setValue($1);}
-	|
-	E_I{$$ = new GenericValue();$$->setValue($1);}
-	|
-	E_F{$$ = new GenericValue();$$->setValue($1);}
-	|
-	E_S{$$ = new GenericValue();$$->setValue($1);}
-	;
-E_I : E_I TOK_PLUS E_I { $$ = $1 + $3; }
-    |
-    E_I TOK_MINUS E_I { $$ = $1 - $3; }
-    |
-    E_I TOK_MULTIPLY E_I { $$ = $1 * $3; }
-    |
-    E_I TOK_DIVIDE E_I 
-	{ 
-	  if($3 == 0) 
-	  { 
-	      sprintf(msg,"%d:%d Eroare semantica: Impartire la zero!", @1.first_line, @1.first_column);
-	      yyerror(msg);
-	      YYERROR;
-	  } 
-	  else { $$ = $1 / $3; } 
-	}
-    | 
-    TOK_LEFT E_I TOK_RIGHT
-    {
-	$$ = $2;
-    }
-    |
-    TOK_INT_VALUE { $$ = $1; }
-    ;
-E_F : E_F TOK_PLUS E_F { $$ = $1 + $3; }
-    |
-    E_F TOK_MINUS E_F { $$ = $1 - $3; }
-    |
-    E_F TOK_MULTIPLY E_F { $$ = $1 * $3; }
-    |
-    E_F TOK_DIVIDE E_F 
-	{ 
-	  if($3 == (float)0) 
-	  { 
-	      sprintf(msg,"%d:%d Eroare semantica: Impartire la zero!", @1.first_line, @1.first_column);
-	      yyerror(msg);
-	      YYERROR;
-	  } 
-	  else { $$ = $1 / $3; } 
-	}
-    | 
-    TOK_LEFT E_F TOK_RIGHT
-    {
-	$$ = $2;
-    }
-    |
-    TOK_FLOAT_VALUE { $$ = $1; }
-    ;
-E_B : TOK_LEFT E_B TOK_RIGHT
-    {
-	$$ = $2;
-    }
-    |
-    TOK_TRUE { $$ = $1; }
-	|
-	TOK_FALSE { $$ = $1; }
-    ;
-E_S : TOK_STRING_VALUE
+IFDECL: TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B %prec ifx
 	{
-		$$ = $1;
+		if($3==true)
+		{
+			printf("Execut\n");
+		}
+		else
+		{
+			printf("NU execut\n");
+		}
+	}
+	|
+	TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B TOK_ELSE B
+	{
+		if($3==true)
+		{
+			printf("Execut primul bloc\n");
+		}
+		else
+		{
+			printf("Execut al doilea bloc\n");
+		}
+	}
+	
+	;
+BOOLE: E_BFIS TOK_EQU E_BFIS
+	{
+		if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() == *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() == *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() == *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == 0)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near ==", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	|
+	E_BFIS TOK_NEQ E_BFIS
+	{
+		if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() != *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() != *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() != *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) != 0)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near !=", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	|
+	E_BFIS TOK_GTR E_BFIS
+	{
+		if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() > *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() > *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() > *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == 1)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near >", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	|
+	E_BFIS TOK_LSS E_BFIS
+	{
+		if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() < *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() < *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() < *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == -1)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near <", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	|
+	E_BFIS TOK_LEQ E_BFIS
+	{
+	if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() <= *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() <= *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() <= *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) <= 0)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near <=", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	|
+	E_BFIS TOK_GEQ E_BFIS
+	{
+		if($1->getType()==$3->getType())
+		{
+			if($1->getType() == 0)
+			{
+				if(*(bool*)$1->getValue() >= *(bool*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 1)
+			{
+				if(*(float*)$1->getValue() >= *(float*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 2)
+			{
+				if(*(int*)$1->getValue() >= *(int*)$3->getValue())
+					$$=true;
+				else
+					$$=false;
+			}
+			if($1->getType() == 3)
+			{
+				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) >= 0)
+					$$=true;
+				else
+					$$=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near >=", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+	;
+REPUNTIL: TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE TOK_RIGHT
+	{
+		printf("I repeat but I also protek\n");
+	}
+	;
+E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
+	|
+	TOK_FLOAT_VALUE{$$ = new GenericValue();$$->setValue($1);}
+	|
+	TOK_STRING_VALUE{$$ = new GenericValue();$$->setValue($1);}
+	|
+	TOK_TRUE{$$ = new GenericValue();$$->setValue(true);}
+	|
+	TOK_FALSE{$$ = new GenericValue();$$->setValue(false);}
+	|
+	E_BFIS TOK_PLUS E_BFIS 
+	{
+		$$ = new GenericValue();
+		if($1->getType()!=$3->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if($1->getType()==2)
+			{
+				$$->setValue(*(int*)$1->getValue()+*(int*)$3->getValue());
+			}
+			if($1->getType()==1)
+			{
+				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
+			}
+			
+		}
+	}
+    |
+    E_BFIS TOK_MINUS E_BFIS 
+	{
+		$$ = new GenericValue();
+		if($1->getType()!=$3->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if($1->getType()==2)
+			{
+				$$->setValue(*(int*)$1->getValue()-*(int*)$3->getValue());
+			}
+			if($1->getType()==1)
+			{
+				$$->setValue(*(float*)$1->getValue()-*(float*)$3->getValue());
+			}
+			
+		}
+	}
+    |
+    E_BFIS TOK_MULTIPLY E_BFIS
+	{
+		$$ = new GenericValue();
+		if($1->getType()!=$3->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if($1->getType()==2)
+			{
+				$$->setValue(*(int*)$1->getValue() * *(int*)$3->getValue());
+			}
+			if($1->getType()==1)
+			{
+				$$->setValue(*(float*)$1->getValue() * *(float*)$3->getValue());
+			}
+			
+		}
+	}
+    |
+    E_BFIS TOK_DIVIDE E_BFIS 
+	{
+		$$ = new GenericValue();
+		if($3->getType()!=1 && $3->getType()!=2)
+		{
+			sprintf(msg,"%d:%d Did you just tried to divide by a %s", @1.first_line, @1.first_column, types[$3->getType()]);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		if($1->getType()!=$3->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", @1.first_line, @1.first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if($1->getType()==2)
+			{
+				if(*(int*)$3->getValue() != 0)
+				{
+					$$->setValue(*(int*)$1->getValue() / *(int*)$3->getValue());
+				}
+				else
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
+	  				yyerror(msg);
+	  				YYERROR;
+				}
+			}
+			if($1->getType()==1)
+			{
+				if(*(float*)$3->getValue() != 0)
+				{
+					$$->setValue(*(float*)$1->getValue() / *(float*)$3->getValue());
+				}
+				else
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
+	  				yyerror(msg);
+	  				YYERROR;
+				}
+			}
+			
+		}
+	}
+	|
+	TOK_LEFT E_BFIS TOK_RIGHT
+	{
+		$$ = new GenericValue();
+		if($2->getType()==0)
+		{
+			$$->setValue(*(bool*)$2->getValue());
+		}
+		if($2->getType()==1)
+		{
+			$$->setValue(*(float*)$2->getValue());
+		}
+		if($2->getType()==2)
+		{
+			$$->setValue(*(int*)$2->getValue());
+		}
+		if($2->getType()==3)
+		{
+			$$->setValue(*(char**)$2->getValue());
+		}
+		
+	}
+	|
+	TOK_VARIABLE
+	{
+		if(ts != NULL)
+		{
+		if(ts->exists($1) == 1)
+			{
+				$$=new GenericValue();
+				if(ts->getType($1)==0)
+				{
+					$$->setValue(*(bool*)ts->getValue($1));
+				}
+				if(ts->getType($1)==1)
+				{
+					$$->setValue(*(float*)ts->getValue($1));
+				}
+				if(ts->getType($1)==2)
+				{
+					$$->setValue(*(int*)ts->getValue($1));
+				}
+				if(ts->getType($1)==3)
+				{
+					$$->setValue(*(char**)ts->getValue($1));
+				}
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+				yyerror(msg);
+				YYERROR;
+			}
+		}
+		else
+		{
+		  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+		  yyerror(msg);
+		  YYERROR;
+		}
 	}
     ;
 

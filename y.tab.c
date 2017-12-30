@@ -420,13 +420,15 @@ extern int yydebug;
     TOK_ELSE = 276,
     TOK_PRINT = 277,
     TOK_ERROR = 278,
-    TOK_INT_VALUE = 279,
-    TOK_FLOAT_VALUE = 280,
-    TOK_TRUE = 281,
-    TOK_FALSE = 282,
-    TOK_STRING_VALUE = 283,
-    TOK_DATA_TYPE = 284,
-    TOK_VARIABLE = 285
+    TOK_THEN = 279,
+    ifx = 280,
+    TOK_INT_VALUE = 281,
+    TOK_FLOAT_VALUE = 282,
+    TOK_TRUE = 283,
+    TOK_FALSE = 284,
+    TOK_STRING_VALUE = 285,
+    TOK_DATA_TYPE = 286,
+    TOK_VARIABLE = 287
   };
 #endif
 /* Tokens.  */
@@ -451,13 +453,15 @@ extern int yydebug;
 #define TOK_ELSE 276
 #define TOK_PRINT 277
 #define TOK_ERROR 278
-#define TOK_INT_VALUE 279
-#define TOK_FLOAT_VALUE 280
-#define TOK_TRUE 281
-#define TOK_FALSE 282
-#define TOK_STRING_VALUE 283
-#define TOK_DATA_TYPE 284
-#define TOK_VARIABLE 285
+#define TOK_THEN 279
+#define ifx 280
+#define TOK_INT_VALUE 281
+#define TOK_FLOAT_VALUE 282
+#define TOK_TRUE 283
+#define TOK_FALSE 284
+#define TOK_STRING_VALUE 285
+#define TOK_DATA_TYPE 286
+#define TOK_VARIABLE 287
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -467,7 +471,7 @@ union YYSTYPE
 #line 304 "tema2.y" /* yacc.c:355  */
  char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;
 
-#line 471 "y.tab.c" /* yacc.c:355  */
+#line 475 "y.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -498,7 +502,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 502 "y.tab.c" /* yacc.c:358  */
+#line 506 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -740,23 +744,23 @@ union yyalloc
 #endif /* !YYCOPY_NEEDED */
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  11
+#define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   66
+#define YYLAST   71
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  33
+#define YYNTOKENS  35
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  8
+#define YYNNTS  9
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  28
+#define YYNRULES  33
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  52
+#define YYNSTATES  70
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
 #define YYUNDEFTOK  2
-#define YYMAXUTOK   285
+#define YYMAXUTOK   287
 
 #define YYTRANSLATE(YYX)                                                \
   ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
@@ -770,8 +774,8 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,    31,
-       2,    32,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,    33,
+       2,    34,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -793,16 +797,17 @@ static const yytype_uint8 yytranslate[] =
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30
+      25,    26,    27,    28,    29,    30,    31,    32
 };
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   327,   327,   329,   331,   334,   381,   508,   530,   581,
-     583,   585,   587,   589,   591,   593,   595,   606,   611,   613,
-     615,   617,   619,   630,   635,   637,   642,   644,   646
+       0,   328,   328,   330,   332,   335,   337,   339,   341,   343,
+     345,   392,   519,   541,   592,   604,   617,   658,   699,   740,
+     781,   822,   863,   868,   870,   872,   874,   876,   878,   901,
+     924,   947,   994,  1016
 };
 #endif
 
@@ -815,9 +820,10 @@ static const char *const yytname[] =
   "TOK_MULTIPLY", "TOK_DIVIDE", "TOK_LEFT", "TOK_RIGHT", "TOK_NEQ",
   "TOK_EQU", "TOK_GTR", "TOK_LSS", "TOK_LEQ", "TOK_GEQ", "TOK_BEGIN",
   "TOK_END", "TOK_REPEAT", "TOK_UNTIL", "TOK_IF", "TOK_ELSE", "TOK_PRINT",
-  "TOK_ERROR", "TOK_INT_VALUE", "TOK_FLOAT_VALUE", "TOK_TRUE", "TOK_FALSE",
-  "TOK_STRING_VALUE", "TOK_DATA_TYPE", "TOK_VARIABLE", "';'", "'='",
-  "$accept", "S", "I", "E_BFIS", "E_I", "E_F", "E_B", "E_S", YY_NULLPTR
+  "TOK_ERROR", "TOK_THEN", "ifx", "TOK_INT_VALUE", "TOK_FLOAT_VALUE",
+  "TOK_TRUE", "TOK_FALSE", "TOK_STRING_VALUE", "TOK_DATA_TYPE",
+  "TOK_VARIABLE", "';'", "'='", "$accept", "S", "B", "INST", "I", "IFDECL",
+  "BOOLE", "REPUNTIL", "E_BFIS", YY_NULLPTR
 };
 #endif
 
@@ -829,14 +835,14 @@ static const yytype_uint16 yytoknum[] =
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
      275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
-     285,    59,    61
+     285,   286,   287,    59,    61
 };
 # endif
 
-#define YYPACT_NINF -30
+#define YYPACT_NINF -31
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-30)))
+  (!!((Yystate) == (-31)))
 
 #define YYTABLE_NINF -3
 
@@ -847,12 +853,13 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-       4,   -29,   -24,   -13,     5,    25,     8,     4,   -30,    26,
-      16,   -30,     4,   -30,    16,    23,   -30,   -30,   -30,   -30,
-     -30,   -30,     9,    57,   -30,   -30,   -30,   -30,     3,    47,
-      50,    -5,    -5,    -5,    -5,    -7,    -7,    -7,    -7,   -30,
-     -30,   -30,    -5,    29,    29,   -30,   -30,    -7,    39,    39,
-     -30,   -30
+      59,   -30,   -21,    13,    59,    19,   -31,   -31,   -16,   -31,
+      19,    29,   -13,     6,     5,    27,    23,   -31,   -31,    42,
+       4,   -31,    30,     4,   -31,   -16,    55,     4,   -31,   -31,
+     -31,   -31,   -31,   -31,    56,    36,     4,     3,   -31,     4,
+      48,    43,     4,     4,     4,     4,     4,     4,     4,     4,
+       4,     4,     3,    57,   -31,    19,    11,    11,   -31,   -31,
+       3,     3,     3,     3,     3,     3,   -31,    47,    19,   -31
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -860,24 +867,25 @@ static const yytype_int8 yypact[] =
      means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
-       0,     0,     0,     0,     0,     0,     0,     0,     8,     7,
-       0,     1,     0,     4,     0,     0,    18,    24,    26,    27,
-      28,     5,    10,    11,     9,    12,     3,     6,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    17,
-      23,    25,     0,    13,    14,    15,    16,     0,    19,    20,
-      21,    22
+       0,     0,     0,     0,     0,     0,     1,     4,     6,     3,
+       0,     0,     0,     0,     0,     0,     0,     8,     9,     0,
+       0,    13,    12,     0,     5,     6,     0,     0,    23,    24,
+      26,    27,    25,    33,     0,     0,     0,    10,     7,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,    11,     0,    32,     0,    28,    29,    30,    31,
+      17,    16,    18,    19,    20,    21,    22,    14,     0,    15
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -30,    48,   -30,    43,    -4,   -15,    51,   -30
+     -31,    65,   -10,    45,   -31,   -31,    32,   -31,   -22
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     5,     6,    21,    22,    23,    24,    25
+      -1,     3,     9,    15,    16,    17,    34,    18,    35
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -885,52 +893,57 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      29,    47,     7,    42,    -2,     1,     8,    31,    32,    33,
-      34,    28,    39,    31,    32,    33,    34,     9,    17,    16,
-      48,    49,    50,    51,    15,    11,     2,    43,    44,    45,
-      46,    15,    29,     3,     4,    33,    34,    10,    28,    12,
-      16,    17,    18,    19,    20,    37,    38,    16,    17,    18,
-      19,    35,    36,    37,    38,    13,    40,    27,    14,    41,
-      26,    35,    36,    37,    38,     0,    30
+      19,    37,    10,     4,    11,    40,    12,    42,    43,    44,
+      45,     5,    27,     6,    52,    13,    14,    44,    45,    21,
+      56,    57,    58,    59,    60,    61,    62,    63,    64,    65,
+      28,    29,    30,    31,    32,     8,    33,    20,    22,    23,
+      42,    43,    44,    45,    24,    67,    46,    47,    48,    49,
+      50,    51,    42,    43,    44,    45,    25,    54,    69,    -2,
+       1,    26,     2,    39,    36,    41,    66,    55,    68,     7,
+      38,    53
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      15,     8,    31,     8,     0,     1,    30,     4,     5,     6,
-       7,    15,     9,     4,     5,     6,     7,    30,    25,    24,
-      35,    36,    37,    38,     8,     0,    22,    31,    32,    33,
-      34,     8,    47,    29,    30,     6,     7,    32,    42,    31,
-      24,    25,    26,    27,    28,     6,     7,    24,    25,    26,
-      27,     4,     5,     6,     7,     7,     9,    14,    32,     9,
-      12,     4,     5,     6,     7,    -1,    15
+      10,    23,    18,    33,    20,    27,    22,     4,     5,     6,
+       7,    32,     8,     0,    36,    31,    32,     6,     7,    32,
+      42,    43,    44,    45,    46,    47,    48,    49,    50,    51,
+      26,    27,    28,    29,    30,    16,    32,     8,    32,    34,
+       4,     5,     6,     7,    17,    55,    10,    11,    12,    13,
+      14,    15,     4,     5,     6,     7,    33,     9,    68,     0,
+       1,    19,     3,     8,    34,     9,     9,    24,    21,     4,
+      25,    39
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const yytype_uint8 yystos[] =
 {
-       0,     1,    22,    29,    30,    34,    35,    31,    30,    30,
-      32,     0,    31,    34,    32,     8,    24,    25,    26,    27,
-      28,    36,    37,    38,    39,    40,    34,    36,    37,    38,
-      39,     4,     5,     6,     7,     4,     5,     6,     7,     9,
-       9,     9,     8,    37,    37,    37,    37,     8,    38,    38,
-      38,    38
+       0,     1,     3,    36,    33,    32,     0,    36,    16,    37,
+      18,    20,    22,    31,    32,    38,    39,    40,    42,    37,
+       8,    32,    32,    34,    17,    33,    19,     8,    26,    27,
+      28,    29,    30,    32,    41,    43,    34,    43,    38,     8,
+      43,     9,     4,     5,     6,     7,    10,    11,    12,    13,
+      14,    15,    43,    41,     9,    24,    43,    43,    43,    43,
+      43,    43,    43,    43,    43,    43,     9,    37,    21,    37
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
-       0,    33,    34,    34,    34,    35,    35,    35,    35,    36,
-      36,    36,    36,    37,    37,    37,    37,    37,    37,    38,
-      38,    38,    38,    38,    38,    39,    39,    39,    40
+       0,    35,    36,    36,    36,    37,    38,    38,    39,    39,
+      39,    39,    39,    39,    40,    40,    41,    41,    41,    41,
+      41,    41,    42,    43,    43,    43,    43,    43,    43,    43,
+      43,    43,    43,    43
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
-       0,     2,     0,     3,     3,     3,     4,     2,     2,     1,
-       1,     1,     1,     3,     3,     3,     3,     3,     1,     3,
-       3,     3,     3,     3,     1,     3,     1,     1,     1
+       0,     2,     0,     3,     3,     3,     0,     3,     1,     1,
+       3,     4,     2,     2,     6,     8,     3,     3,     3,     3,
+       3,     3,     6,     1,     1,     1,     1,     1,     3,     3,
+       3,     3,     3,     1
 };
 
 
@@ -1700,13 +1713,13 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 332 "tema2.y" /* yacc.c:1646  */
+#line 333 "tema2.y" /* yacc.c:1646  */
     { EsteCorecta = 0; }
-#line 1706 "y.tab.c" /* yacc.c:1646  */
+#line 1719 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 5:
-#line 335 "tema2.y" /* yacc.c:1646  */
+  case 10:
+#line 346 "tema2.y" /* yacc.c:1646  */
     {
 		if(ts != NULL)
 		{
@@ -1752,11 +1765,11 @@ yyreduce:
 			YYERROR;
 		}
 	}
-#line 1756 "y.tab.c" /* yacc.c:1646  */
+#line 1769 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 6:
-#line 382 "tema2.y" /* yacc.c:1646  */
+  case 11:
+#line 393 "tema2.y" /* yacc.c:1646  */
     {
 	if(ts != NULL)
 	{
@@ -1882,11 +1895,11 @@ yyreduce:
 	    }
 	}
     }
-#line 1886 "y.tab.c" /* yacc.c:1646  */
+#line 1899 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 7:
-#line 509 "tema2.y" /* yacc.c:1646  */
+  case 12:
+#line 520 "tema2.y" /* yacc.c:1646  */
     {
     if(ts != NULL)
     {
@@ -1907,11 +1920,11 @@ yyreduce:
     	ts->add((yyvsp[0].name), (yyvsp[-1].val_int));
     }
     }
-#line 1911 "y.tab.c" /* yacc.c:1646  */
+#line 1924 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 8:
-#line 531 "tema2.y" /* yacc.c:1646  */
+  case 13:
+#line 542 "tema2.y" /* yacc.c:1646  */
     {
 	if(ts != NULL)
 	{
@@ -1961,155 +1974,538 @@ yyreduce:
 	}
 	
 }
-#line 1965 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 9:
-#line 581 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_bool));}
-#line 1971 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 10:
-#line 583 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_int));}
-#line 1977 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 11:
-#line 585 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
-#line 1983 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 12:
-#line 587 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
-#line 1989 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 13:
-#line 589 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) + (yyvsp[0].val_int); }
-#line 1995 "y.tab.c" /* yacc.c:1646  */
+#line 1978 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 591 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) - (yyvsp[0].val_int); }
-#line 2001 "y.tab.c" /* yacc.c:1646  */
+#line 593 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-3].val_bool)==true)
+		{
+			printf("Execut\n");
+		}
+		else
+		{
+			printf("NU execut\n");
+		}
+	}
+#line 1993 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 593 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[-2].val_int) * (yyvsp[0].val_int); }
-#line 2007 "y.tab.c" /* yacc.c:1646  */
+#line 605 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-5].val_bool)==true)
+		{
+			printf("Execut primul bloc\n");
+		}
+		else
+		{
+			printf("Execut al doilea bloc\n");
+		}
+	}
+#line 2008 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 596 "tema2.y" /* yacc.c:1646  */
-    { 
-	  if((yyvsp[0].val_int) == 0) 
-	  { 
-	      sprintf(msg,"%d:%d Eroare semantica: Impartire la zero!", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
-	      yyerror(msg);
-	      YYERROR;
-	  } 
-	  else { (yyval.val_int) = (yyvsp[-2].val_int) / (yyvsp[0].val_int); } 
+#line 618 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() == *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() == *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() == *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) == 0)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near ==", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
 	}
-#line 2021 "y.tab.c" /* yacc.c:1646  */
+#line 2052 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 607 "tema2.y" /* yacc.c:1646  */
+#line 659 "tema2.y" /* yacc.c:1646  */
     {
-	(yyval.val_int) = (yyvsp[-1].val_int);
-    }
-#line 2029 "y.tab.c" /* yacc.c:1646  */
+		if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() != *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() != *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() != *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) != 0)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near !=", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+#line 2096 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 611 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_int) = (yyvsp[0].val_int); }
-#line 2035 "y.tab.c" /* yacc.c:1646  */
+#line 700 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() > *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() > *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() > *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) == 1)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near >", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+#line 2140 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 613 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) + (yyvsp[0].val_float); }
-#line 2041 "y.tab.c" /* yacc.c:1646  */
+#line 741 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() < *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() < *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() < *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) == -1)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near <", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+#line 2184 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 615 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) - (yyvsp[0].val_float); }
-#line 2047 "y.tab.c" /* yacc.c:1646  */
+#line 782 "tema2.y" /* yacc.c:1646  */
+    {
+	if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() <= *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() <= *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() <= *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) <= 0)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near <=", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+#line 2228 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 617 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[-2].val_float) * (yyvsp[0].val_float); }
-#line 2053 "y.tab.c" /* yacc.c:1646  */
+#line 823 "tema2.y" /* yacc.c:1646  */
+    {
+		if((yyvsp[-2].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
+		{
+			if((yyvsp[-2].val_generic)->getType() == 0)
+			{
+				if(*(bool*)(yyvsp[-2].val_generic)->getValue() >= *(bool*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 1)
+			{
+				if(*(float*)(yyvsp[-2].val_generic)->getValue() >= *(float*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 2)
+			{
+				if(*(int*)(yyvsp[-2].val_generic)->getValue() >= *(int*)(yyvsp[0].val_generic)->getValue())
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+			if((yyvsp[-2].val_generic)->getType() == 3)
+			{
+				if(strcmp(*(char**)(yyvsp[-2].val_generic)->getValue(), *(char**)(yyvsp[0].val_generic)->getValue()) >= 0)
+					(yyval.val_bool)=true;
+				else
+					(yyval.val_bool)=false;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Type mismatch near >=", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+	}
+#line 2272 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 620 "tema2.y" /* yacc.c:1646  */
-    { 
-	  if((yyvsp[0].val_float) == (float)0) 
-	  { 
-	      sprintf(msg,"%d:%d Eroare semantica: Impartire la zero!", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
-	      yyerror(msg);
-	      YYERROR;
-	  } 
-	  else { (yyval.val_float) = (yyvsp[-2].val_float) / (yyvsp[0].val_float); } 
+#line 864 "tema2.y" /* yacc.c:1646  */
+    {
+		printf("I repeat but I also protek\n");
 	}
-#line 2067 "y.tab.c" /* yacc.c:1646  */
+#line 2280 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 631 "tema2.y" /* yacc.c:1646  */
-    {
-	(yyval.val_float) = (yyvsp[-1].val_float);
-    }
-#line 2075 "y.tab.c" /* yacc.c:1646  */
+#line 868 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_int));}
+#line 2286 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 635 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_float) = (yyvsp[0].val_float); }
-#line 2081 "y.tab.c" /* yacc.c:1646  */
+#line 870 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
+#line 2292 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 638 "tema2.y" /* yacc.c:1646  */
-    {
-	(yyval.val_bool) = (yyvsp[-1].val_bool);
-    }
-#line 2089 "y.tab.c" /* yacc.c:1646  */
+#line 872 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
+#line 2298 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 642 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_bool) = (yyvsp[0].val_bool); }
-#line 2095 "y.tab.c" /* yacc.c:1646  */
+#line 874 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(true);}
+#line 2304 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 644 "tema2.y" /* yacc.c:1646  */
-    { (yyval.val_bool) = (yyvsp[0].val_bool); }
-#line 2101 "y.tab.c" /* yacc.c:1646  */
+#line 876 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(false);}
+#line 2310 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 647 "tema2.y" /* yacc.c:1646  */
+#line 879 "tema2.y" /* yacc.c:1646  */
     {
-		(yyval.val_string) = (yyvsp[0].val_string);
+		(yyval.val_generic) = new GenericValue();
+		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if((yyvsp[-2].val_generic)->getType()==2)
+			{
+				(yyval.val_generic)->setValue(*(int*)(yyvsp[-2].val_generic)->getValue()+*(int*)(yyvsp[0].val_generic)->getValue());
+			}
+			if((yyvsp[-2].val_generic)->getType()==1)
+			{
+				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue()+*(float*)(yyvsp[0].val_generic)->getValue());
+			}
+			
+		}
 	}
-#line 2109 "y.tab.c" /* yacc.c:1646  */
+#line 2336 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 29:
+#line 902 "tema2.y" /* yacc.c:1646  */
+    {
+		(yyval.val_generic) = new GenericValue();
+		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if((yyvsp[-2].val_generic)->getType()==2)
+			{
+				(yyval.val_generic)->setValue(*(int*)(yyvsp[-2].val_generic)->getValue()-*(int*)(yyvsp[0].val_generic)->getValue());
+			}
+			if((yyvsp[-2].val_generic)->getType()==1)
+			{
+				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue()-*(float*)(yyvsp[0].val_generic)->getValue());
+			}
+			
+		}
+	}
+#line 2362 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 30:
+#line 925 "tema2.y" /* yacc.c:1646  */
+    {
+		(yyval.val_generic) = new GenericValue();
+		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if((yyvsp[-2].val_generic)->getType()==2)
+			{
+				(yyval.val_generic)->setValue(*(int*)(yyvsp[-2].val_generic)->getValue() * *(int*)(yyvsp[0].val_generic)->getValue());
+			}
+			if((yyvsp[-2].val_generic)->getType()==1)
+			{
+				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue() * *(float*)(yyvsp[0].val_generic)->getValue());
+			}
+			
+		}
+	}
+#line 2388 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 31:
+#line 948 "tema2.y" /* yacc.c:1646  */
+    {
+		(yyval.val_generic) = new GenericValue();
+		if((yyvsp[0].val_generic)->getType()!=1 && (yyvsp[0].val_generic)->getType()!=2)
+		{
+			sprintf(msg,"%d:%d Did you just tried to divide by a %s", (yylsp[-2]).first_line, (yylsp[-2]).first_column, types[(yyvsp[0].val_generic)->getType()]);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
+		{
+			sprintf(msg,"%d:%d Type mismatch", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  		yyerror(msg);
+	  		YYERROR;
+		}
+		else
+		{
+			if((yyvsp[-2].val_generic)->getType()==2)
+			{
+				if(*(int*)(yyvsp[0].val_generic)->getValue() != 0)
+				{
+					(yyval.val_generic)->setValue(*(int*)(yyvsp[-2].val_generic)->getValue() / *(int*)(yyvsp[0].val_generic)->getValue());
+				}
+				else
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  				yyerror(msg);
+	  				YYERROR;
+				}
+			}
+			if((yyvsp[-2].val_generic)->getType()==1)
+			{
+				if(*(float*)(yyvsp[0].val_generic)->getValue() != 0)
+				{
+					(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue() / *(float*)(yyvsp[0].val_generic)->getValue());
+				}
+				else
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  				yyerror(msg);
+	  				YYERROR;
+				}
+			}
+			
+		}
+	}
+#line 2438 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 995 "tema2.y" /* yacc.c:1646  */
+    {
+		(yyval.val_generic) = new GenericValue();
+		if((yyvsp[-1].val_generic)->getType()==0)
+		{
+			(yyval.val_generic)->setValue(*(bool*)(yyvsp[-1].val_generic)->getValue());
+		}
+		if((yyvsp[-1].val_generic)->getType()==1)
+		{
+			(yyval.val_generic)->setValue(*(float*)(yyvsp[-1].val_generic)->getValue());
+		}
+		if((yyvsp[-1].val_generic)->getType()==2)
+		{
+			(yyval.val_generic)->setValue(*(int*)(yyvsp[-1].val_generic)->getValue());
+		}
+		if((yyvsp[-1].val_generic)->getType()==3)
+		{
+			(yyval.val_generic)->setValue(*(char**)(yyvsp[-1].val_generic)->getValue());
+		}
+		
+	}
+#line 2463 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 33:
+#line 1017 "tema2.y" /* yacc.c:1646  */
+    {
+		if(ts != NULL)
+		{
+		if(ts->exists((yyvsp[0].name)) == 1)
+			{
+				(yyval.val_generic)=new GenericValue();
+				if(ts->getType((yyvsp[0].name))==0)
+				{
+					(yyval.val_generic)->setValue(*(bool*)ts->getValue((yyvsp[0].name)));
+				}
+				if(ts->getType((yyvsp[0].name))==1)
+				{
+					(yyval.val_generic)->setValue(*(float*)ts->getValue((yyvsp[0].name)));
+				}
+				if(ts->getType((yyvsp[0].name))==2)
+				{
+					(yyval.val_generic)->setValue(*(int*)ts->getValue((yyvsp[0].name)));
+				}
+				if(ts->getType((yyvsp[0].name))==3)
+				{
+					(yyval.val_generic)->setValue(*(char**)ts->getValue((yyvsp[0].name)));
+				}
+			}
+			else
+			{
+				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[0]).first_line, (yylsp[0]).first_column, (yyvsp[0].name));
+				yyerror(msg);
+				YYERROR;
+			}
+		}
+		else
+		{
+		  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[0]).first_line, (yylsp[0]).first_column, (yyvsp[0].name));
+		  yyerror(msg);
+		  YYERROR;
+		}
+	}
+#line 2505 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2113 "y.tab.c" /* yacc.c:1646  */
+#line 2509 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2344,7 +2740,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 652 "tema2.y" /* yacc.c:1906  */
+#line 1056 "tema2.y" /* yacc.c:1906  */
 
 
 int main()

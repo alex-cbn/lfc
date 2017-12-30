@@ -32,6 +32,7 @@
 "until" 	{colNo+=5; return TOK_UNTIL;}
 "if" 		{colNo+=2; return TOK_IF;}
 "else" 		{colNo+=4; return TOK_ELSE;}
+"then"		{colNo+=4; return TOK_THEN;}
 int|float|boolean|string {if(strcmp(yytext, "int")==0){colNo+=3; yylval.val_int = 2; return TOK_DATA_TYPE;}if(strcmp(yytext, "float")==0){colNo+=5; yylval.val_int = 1; return TOK_DATA_TYPE;}if(strcmp(yytext, "boolean")==0){colNo+=7; yylval.val_int = 0; return TOK_DATA_TYPE;}	if(strcmp(yytext, "string")==0)	{colNo+=6; yylval.val_int = 3; return TOK_DATA_TYPE;}}
 "print"		{ colNo+=5; return TOK_PRINT; }
 [a-zA-Z][a-zA-Z0-9]* { yylloc.first_line = lineNo; yylloc.first_column = colNo; colNo+=strlen(yytext); yylval.name = new char[strlen(yytext)+1]; strcpy(yylval.name,yytext); return TOK_VARIABLE;}

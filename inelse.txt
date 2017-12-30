@@ -1,0 +1,29 @@
+program work
+begin
+  int a=5;
+  print a;
+ if (a<6) then
+ begin
+  int b=6;
+  print b;
+ end;
+ string str="sean";
+ string strd="sean";
+ if (str!=strd) then
+ begin
+  float c=6.7;
+  print c;
+ end
+ else
+  begin
+  print a;
+  print a;
+  print a;
+ end;
+ repeat
+ begin
+  b=b+1;
+  print b;
+ end
+ until(b==9);
+end

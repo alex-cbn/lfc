@@ -1,0 +1,26 @@
+program kurwa
+begin
+float a=6.7;
+int b=5;
+string str="abde";
+print a;
+print b;
+print str;
+boolean lie=True;
+print lie;
+boolean truth=False;
+print truth;
+int adup=a;
+float bdup=b;
+boolean liedup=lie;
+boolean truthdup=truth;
+string strdup=str;
+print adup;
+print bdup;
+print strdup;
+print liedup;
+print truthdup;
+int h=12;
+h=12+3.4;
+print h;
+end
