@@ -369,9 +369,19 @@ TOK_BEGIN INST TOK_END
 	;
 INST: 
 	|
-	I ';' INST
+	{
+	SAME_INSTRUCTION = 0;
+	}
+	I 
+	{
+	SAME_INSTRUCTION = 0;
+	}';' INST
 	;
 I : IFDECL %prec ifx
+{
+	printf("BLOCK_%d:\n\n", ++block_count);
+	block_count++;
+}
 	|
 	IFDECL ELSEDECL %prec TOK_ELSE
 	|
@@ -386,35 +396,38 @@ I : IFDECL %prec ifx
 	    repeat_stack.pop();
 	}
 	|
-	TOK_VARIABLE '=' E_BFIS
+	TOK_VARIABLE
+	{
+        SAME_INSTRUCTION = 0;	
+	} '=' E_BFIS
 	{
 		if(ts != NULL)
 		{
 			if(ts->exists($1) == 1)
 		  	{
-		  		if(ts->getType($1)==$3->getType())
+		  		if(ts->getType($1)==$4->getType())
 				{
 					if(ts->getType($1)==0)
 					{
-						ts->setValue($1, *(bool*)$3->getValue());
+						ts->setValue($1, *(bool*)$4->getValue());
 					}
 					if(ts->getType($1)==1)
 					{
-						ts->setValue($1, *(float*)$3->getValue());
+						ts->setValue($1, *(float*)$4->getValue());
 					}
 					if(ts->getType($1)==2)
 					{
-						ts->setValue($1, *(int*)$3->getValue());
+						ts->setValue($1, *(int*)$4->getValue());
 						printf("MOV [%s], EAX\n", $1);
 					}
 					if(ts->getType($1)==3)
 					{
-						ts->setValue($1, *(char**)$3->getValue());
+						ts->setValue($1, *(char**)$4->getValue());
 					}
 				}
 				else
 				{
-					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip %s", @1.first_line, @1.first_column, $1, types[ts->getType($1)], types[$3->getType()]);
+					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip %s", @1.first_line, @1.first_column, $1, types[ts->getType($1)], types[$4->getType()]);
 					yyerror(msg);
 					YYERROR;
 				}					
@@ -436,6 +449,7 @@ I : IFDECL %prec ifx
 	|
     TOK_DATA_TYPE TOK_VARIABLE '=' E_BFIS
     {
+    SAME_INSTRUCTION = 0;
 	if(ts != NULL)
 	{
 	  if(ts->exists($2) == 0)
@@ -470,6 +484,7 @@ I : IFDECL %prec ifx
 	    }
 	    if($1==2)
 	    {
+	        printf("MOV [%s], EAX\n", $2);
 	    	if($4->getType()==2)
 			{
 				ts->setValue($2, *(int*)$4->getValue());
@@ -494,6 +509,7 @@ I : IFDECL %prec ifx
 				YYERROR;  
 			}
 	    }
+	    SAME_INSTRUCTION = 0;
 	  }
 	  else
 	  {
@@ -536,6 +552,7 @@ I : IFDECL %prec ifx
 	    {
 	    	if($4->getType()==2)
 			{
+			    printf("MOV [%s], EAX\n", $2);
 				ts->setValue($2, *(int*)$4->getValue());
 			}
 			else
@@ -646,48 +663,50 @@ ELSEDECL:
 
     ;
 IFDECL:	
-		{
-	    printf("#IF\n");
-		printf("CMP EAX, ECX\n");
-		printf("JNT BLOCK_%d \n",block_count+2);
-	}
-	TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B
-
-	;
-BOOLE: 
-    E_BFIS TOK_EQU E_BFIS
 	{
-	    printf("luate");
-		if($1->getType()==$3->getType())
+	    printf("#IF\n");
+		//printf("CMP EAX, ECX\n");
+	}
+	TOK_IF TOK_LEFT BOOLE 
+	{
+	    if($4==0)// ==
+	    {
+	        printf("JNE BLOCK_%d \n",block_count+2);
+	    }
+	    if($4==1)// !=
+	    {
+	        printf("JE BLOCK_%d \n",block_count+2);
+	    }
+	    if($4==2)// <
+	    {
+	        printf("JGE BLOCK_%d \n",block_count+2);
+	    }
+	    if($4==3)// >
+	    {
+	        printf("JLE BLOCK_%d \n",block_count+2);
+	    }
+	    if($4==4)// <=
+	    {
+	        printf("JG BLOCK_%d \n",block_count+2);
+	    }
+	    if($4==5)// >=
+	    {
+	        printf("JL BLOCK_%d \n",block_count+2);
+	    }
+	}TOK_RIGHT TOK_THEN B
+	;
+
+BOOLE: 
+    E_BFIS 
+    {
+        printf("MOV ECX, EAX\n");
+    }
+    TOK_EQU E_BFIS
+	{
+		if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() == *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() == *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() == *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == 0)
-					$$=true;
-				else
-					$$=false;
-			}
+			printf("CMP EAX, ECX\n");
+		    $$ = 0;
 		}
 		else
 		{
@@ -697,38 +716,17 @@ BOOLE:
 		}
 	}
 	|
-	E_BFIS TOK_NEQ E_BFIS
+	E_BFIS 
 	{
-		if($1->getType()==$3->getType())
+	    printf("MOV ECX, EAX\n");
+	    SAME_INSTRUCTION = 0;
+	}
+	TOK_NEQ E_BFIS
+	{
+		if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() != *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() != *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() != *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) != 0)
-					$$=true;
-				else
-					$$=false;
-			}
+            $$=1;
+		    printf("CMP EAX, ECX\n");
 		}
 		else
 		{
@@ -738,38 +736,16 @@ BOOLE:
 		}
 	}
 	|
-	E_BFIS TOK_GTR E_BFIS
+	E_BFIS
 	{
-		if($1->getType()==$3->getType())
+	    printf("MOV ECX, EAX\n");
+	} 
+	TOK_GTR E_BFIS
+	{
+		if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() > *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() > *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() > *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == 1)
-					$$=true;
-				else
-					$$=false;
-			}
+		    $$=3;
+			printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -779,38 +755,17 @@ BOOLE:
 		}
 	}
 	|
-	E_BFIS TOK_LSS E_BFIS
+	E_BFIS
 	{
-		if($1->getType()==$3->getType())
+	    printf("MOV ECX, EAX\n");
+	} 
+	 TOK_LSS E_BFIS
+	{
+		if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() < *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() < *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() < *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) == -1)
-					$$=true;
-				else
-					$$=false;
-			}
+		    $$ =2 ;
+			printf("CMP ECX, EAX\n");
+		    printf("JGE BLOCK_%d \n",block_count+2);
 		}
 		else
 		{
@@ -820,38 +775,16 @@ BOOLE:
 		}
 	}
 	|
-	E_BFIS TOK_LEQ E_BFIS
+	E_BFIS
 	{
-	if($1->getType()==$3->getType())
+	    printf("MOV ECX, EAX\n");
+	} 
+	  TOK_LEQ E_BFIS
+	{
+	if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() <= *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() <= *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() <= *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) <= 0)
-					$$=true;
-				else
-					$$=false;
-			}
+		    $$ = 4;
+			printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -861,38 +794,16 @@ BOOLE:
 		}
 	}
 	|
-	E_BFIS TOK_GEQ E_BFIS
+	E_BFIS
 	{
-		if($1->getType()==$3->getType())
+	    printf("MOV ECX, EAX\n");
+	} 
+	TOK_GEQ E_BFIS
+	{
+		if($1->getType()==$4->getType())
 		{
-			if($1->getType() == 0)
-			{
-				if(*(bool*)$1->getValue() >= *(bool*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 1)
-			{
-				if(*(float*)$1->getValue() >= *(float*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 2)
-			{
-				if(*(int*)$1->getValue() >= *(int*)$3->getValue())
-					$$=true;
-				else
-					$$=false;
-			}
-			if($1->getType() == 3)
-			{
-				if(strcmp(*(char**)$1->getValue(), *(char**)$3->getValue()) >= 0)
-					$$=true;
-				else
-					$$=false;
-			}
+		    $$ = 5;
+			printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -907,7 +818,17 @@ REPUNTIL: TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE TOK_RIGHT
 		printf("I repeat but I also protek\n");
 	}
 	;
-E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
+E_BFIS: TOK_INT_VALUE
+{
+    $$ = new GenericValue();
+    $$->setValue($1);
+    if(!SAME_INSTRUCTION)
+	{
+			    	printf("MOV EAX, %d\n", $1);
+	}
+	SAME_INSTRUCTION++;
+}
+
 	|
 	TOK_FLOAT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 	|
@@ -1218,6 +1139,11 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 				}
 				$$->is_variable=1;
 				$$->var_name = $1;
+				if(!SAME_INSTRUCTION)
+				{
+			    	printf("MOV EAX, [%s]\n", $1);
+			    }
+			    SAME_INSTRUCTION++;
 			}
 			else
 			{
