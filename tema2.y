@@ -339,7 +339,6 @@ GenericValue* gv=new GenericValue();
 %type <val_generic> E_BFIS
 %type <val_int> B
 %type <val_int> BOOLE
-%type <val_int> REPUNTIL
 
 %start S
 
@@ -386,38 +385,7 @@ I : IFDECL %prec ifx
 	|
 	IFDECL ELSEDECL %prec TOK_ELSE
 	|
-	{
-	    repeat_count ++;
-	    repeat_stack.push(block_count+1);
-	}
 	REPUNTIL
-	{
-	    if($4==0)// ==
-	    {
-	        printf("JNE BLOCK_%d \n",repeat_stack.top());
-	    }
-	    if($4==1)// !=
-	    {
-	        printf("JE BLOCK_%d \n",repeat_stack.top());
-	    }
-	    if($4==2)// <
-	    {
-	        printf("JGE BLOCK_%d \n",repeat_stack.top());
-	    }
-	    if($4==3)// >
-	    {
-	        printf("JLE BLOCK_%d \n",repeat_stack.top());
-	    }
-	    if($4==4)// <=
-	    {
-	        printf("JG BLOCK_%d \n",repeat_stack.top());
-	    }
-	    if($4==5)// >=
-	    {
-	        printf("JL BLOCK_%d \n",repeat_stack.top());
-	    }
-	    repeat_stack.pop();
-	}
 	|
 	TOK_VARIABLE
 	{
@@ -836,9 +804,38 @@ BOOLE:
 		}
 	}
 	;
-REPUNTIL: TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE
+REPUNTIL: 
 {
-    $$=$4;
+	    repeat_count ++;
+	    repeat_stack.push(block_count+1);
+}
+TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE
+{
+	    if($6==0)// ==
+	    {
+	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	    }
+	    if($6==1)// !=
+	    {
+	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	    }
+	    if($6==2)// <
+	    {
+	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	    }
+	    if($6==3)// >
+	    {
+	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	    }
+	    if($6==4)// <=
+	    {
+	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	    }
+	    if($6==5)// >=
+	    {
+	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	    }
+	    repeat_stack.pop();
 } 
 TOK_RIGHT
 	;
