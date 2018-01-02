@@ -2,6 +2,18 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdlib>
+#include <stack>
+#include <string>
+
+int SAME_INSTRUCTION = 0;
+int block_count = 0;
+int repeat_count = 0;
+int var_count = 0;
+
+FILE * yyies = NULL;
+
+std::stack<int> block_stack;
+std::stack<int> repeat_stack;
 
 int yylex();
 int yyerror(const char *msg);
@@ -9,6 +21,15 @@ int EsteCorecta = 1;
 char msg[500];
 char types[4][10]={"boolean","float","int","string"};
 
+void printStack(std::stack<std::string> stack)
+{
+	while (!stack.empty())
+	{
+		printf("Stack is");
+		printf("%s\n", stack.top().c_str());
+		stack.pop();
+	}
+}
 
 class TVAR
 {
@@ -231,8 +252,10 @@ class GenericValue
 	bool val_bool;
 	float val_float;
 	char* val_string;
-
 public:
+	int is_variable;
+	int is_in_eax;
+	std::string var_name;
 	GenericValue();
 	void* getValue();
 	int getType();
@@ -245,6 +268,7 @@ public:
 GenericValue::GenericValue()
 {
 	tip=-1;
+	is_variable=0;
 }
 
 void* GenericValue::getValue()
@@ -313,7 +337,8 @@ GenericValue* gv=new GenericValue();
 %token <name> TOK_VARIABLE
 
 %type <val_generic> E_BFIS
-%type <val_bool> BOOLE
+%type <val_int> B
+%type <val_int> BOOLE
 
 %start S
 
@@ -332,15 +357,34 @@ S :
     error ';' S
        { EsteCorecta = 0; }
     ;
-B : TOK_BEGIN INST TOK_END
+B : {
+	printf("\nBLOCK_%d:\n", ++block_count);
+	block_stack.push(block_count);
+	}
+TOK_BEGIN INST TOK_END
+    {
+	printf("E_BLOCK_%d:\n\n", block_stack.top());
+	block_stack.pop();
+	}
 	;
 INST: 
 	|
 	I ';' INST
 	;
-I : IFDECL
+I : IFDECL %prec ifx
 	|
+	IFDECL ELSEDECL %prec TOK_ELSE
+	|
+	{
+	    repeat_count ++;
+	    repeat_stack.push(block_count+1);
+	}
 	REPUNTIL
+	{
+	    printf("CMP EAX, EBX\n");
+	    printf("LOOP BLOCK_%d\n", repeat_stack.top());
+	    repeat_stack.pop();
+	}
 	|
 	TOK_VARIABLE '=' E_BFIS
 	{
@@ -361,6 +405,7 @@ I : IFDECL
 					if(ts->getType($1)==2)
 					{
 						ts->setValue($1, *(int*)$3->getValue());
+						printf("MOV [%s], EAX\n", $1);
 					}
 					if(ts->getType($1)==3)
 					{
@@ -555,10 +600,13 @@ I : IFDECL
 	    if(ts->getType($2)==3)
 		{
 			printf("It's a string! %s\n",*(char**)ts->getValue($2));
+			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
+			fprintf(yyies, "\tla\t$a0, new_line\n\tli\t$v0, 4\n\tsyscall\n");
 		}
 		if(ts->getType($2)==2)
 		{
 			printf("It's an int! %d\n",*(int*)ts->getValue($2));
+			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
 		}
 		if(ts->getType($2)==1)
 		{
@@ -589,33 +637,27 @@ I : IFDECL
 	
 }
     ;
-IFDECL: TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B %prec ifx
-	{
-		if($3==true)
-		{
-			printf("Execut\n");
-		}
-		else
-		{
-			printf("NU execut\n");
-		}
+ELSEDECL:
+    {
+        printf("#ELSE\n");
+		printf("JMP E_BLOCK_%d\n", block_count + 1);
 	}
-	|
-	TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B TOK_ELSE B
-	{
-		if($3==true)
+    TOK_ELSE B
+
+    ;
+IFDECL:	
 		{
-			printf("Execut primul bloc\n");
-		}
-		else
-		{
-			printf("Execut al doilea bloc\n");
-		}
+	    printf("#IF\n");
+		printf("CMP EAX, ECX\n");
+		printf("JNT BLOCK_%d \n",block_count+2);
 	}
-	
+	TOK_IF TOK_LEFT BOOLE TOK_RIGHT TOK_THEN B
+
 	;
-BOOLE: E_BFIS TOK_EQU E_BFIS
+BOOLE: 
+    E_BFIS TOK_EQU E_BFIS
 	{
+	    printf("luate");
 		if($1->getType()==$3->getType())
 		{
 			if($1->getType() == 0)
@@ -889,12 +931,39 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 			if($1->getType()==2)
 			{
 				$$->setValue(*(int*)$1->getValue()+*(int*)$3->getValue());
+				if(SAME_INSTRUCTION == 0)
+				{
+					if($1->is_variable==1)
+					{
+						printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+					}
+					else
+					{
+						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+					}
+					SAME_INSTRUCTION = 1;
+				}
+				if($3->is_variable==1)
+				{
+					printf("ADD EAX, [%s]\n", $3->var_name.c_str());
+				}
+				else
+				{
+					if($3->is_in_eax!=1)
+					{
+						printf("ADD EAX, %d\n", *(int*)$3->getValue());
+					}
+					else
+					{
+						printf("ADD EAX, %d\n", *(int*)$1->getValue());
+					}
+				}
 			}
 			if($1->getType()==1)
 			{
 				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
 			}
-			
+			$$->is_in_eax=1;
 		}
 	}
     |
@@ -912,12 +981,40 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 			if($1->getType()==2)
 			{
 				$$->setValue(*(int*)$1->getValue()-*(int*)$3->getValue());
+				if(SAME_INSTRUCTION == 0)
+				{
+					if($1->is_variable==1)
+					{
+						printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+					}
+					else
+					{
+						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+					}
+					SAME_INSTRUCTION = 1;
+				}
+				if($3->is_variable==1)
+				{
+					printf("SUB EAX, [%s]\n", $3->var_name.c_str());
+				}
+				else
+				{
+					if($3->is_in_eax!=1)
+					{
+						printf("SUB EAX, %d\n", *(int*)$3->getValue());
+					}
+					else
+					{
+						printf("!!SUB EAX, %d\n", *(int*)$3->getValue());
+					}
+					
+				}
 			}
 			if($1->getType()==1)
 			{
 				$$->setValue(*(float*)$1->getValue()-*(float*)$3->getValue());
 			}
-			
+			$$->is_in_eax=1;
 		}
 	}
     |
@@ -935,12 +1032,53 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 			if($1->getType()==2)
 			{
 				$$->setValue(*(int*)$1->getValue() * *(int*)$3->getValue());
+				if(SAME_INSTRUCTION == 0)
+				{
+					if($1->is_variable==1)
+					{
+						if(var_count % 2 == 0)
+						{
+							printf("MOV EAX, EBX\n");
+						}
+						else
+						{
+							printf("MOV EAX, ECX\n");
+						}
+					}
+					else
+					{
+						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+					}
+					SAME_INSTRUCTION = 1;
+				}
+				if($3->is_variable==1)
+				{
+						if(var_count % 2 != 0)
+						{
+							printf("MUL EAX, EBX\n");
+						}
+						else
+						{
+							printf("MUL EAX, ECX\n");
+						}
+				}
+				else
+				{
+					if($3->is_in_eax!=1)
+					{
+						printf("MUL EAX, %d\n", *(int*)$3->getValue());
+					}
+					else
+					{
+						printf("MUL EAX, %d\n", *(int*)$1->getValue());
+					}
+				}
 			}
 			if($1->getType()==1)
 			{
 				$$->setValue(*(float*)$1->getValue() * *(float*)$3->getValue());
 			}
-			
+			$$->is_in_eax=1;
 		}
 	}
     |
@@ -966,6 +1104,47 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 				if(*(int*)$3->getValue() != 0)
 				{
 					$$->setValue(*(int*)$1->getValue() / *(int*)$3->getValue());
+					if(SAME_INSTRUCTION == 0)
+					{
+						if($1->is_variable==1)
+						{
+							if(var_count % 2 == 0)
+							{
+								printf("MOV EAX, EBX\n");
+							}
+							else
+							{
+								printf("MOV EAX, ECX\n");
+							}
+						}
+						else
+						{
+							printf("MOV EAX, %d\n", *(int*)$1->getValue());
+						}
+						SAME_INSTRUCTION = 1;
+					}
+					if($3->is_variable==1)
+					{
+						if(var_count % 2 != 0)
+						{
+							printf("DIV EAX, EBX\n");
+						}
+						else
+						{
+							printf("DIV EAX, ECX\n");
+						}
+					}
+					else
+					{
+						if($3->is_in_eax!=1)
+						{
+							printf("DIV EAX, %d\n", *(int*)$3->getValue());
+						}
+						else
+						{
+							printf("!!DIV EAX, %d\n", *(int*)$3->getValue());
+						}
+					}	
 				}
 				else
 				{
@@ -987,6 +1166,7 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 	  				YYERROR;
 				}
 			}
+			$$->is_in_eax=1;
 			
 		}
 	}
@@ -1036,6 +1216,8 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 				{
 					$$->setValue(*(char**)ts->getValue($1));
 				}
+				$$->is_variable=1;
+				$$->var_name = $1;
 			}
 			else
 			{
@@ -1057,14 +1239,18 @@ E_BFIS: TOK_INT_VALUE{$$ = new GenericValue();$$->setValue($1);}
 
 int main()
 {
+	yyies = fopen("runme.s","w");
+	fprintf(yyies, "\t.text\n\t.globl main\nmain:\n");
+	
 	yyparse();
+	
+	fclose(yyies);
 	
 	if(EsteCorecta == 1)
 	{
 		printf("CORECTA\n");		
 	}	
-
-       return 0;
+	return 0;
 }
 
 int yyerror(const char *msg)

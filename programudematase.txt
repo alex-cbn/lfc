@@ -1,27 +1,27 @@
 program exemplulmeu
 begin
- int m = 34;
- int n = 17;
+    int m = 34;
+    int n = 17;
 
- if(m==n) then
- begin
-  print m;
- end
- else
- begin
-  repeat
-  begin
-   if(m>n) then
-   begin
-    m = m - n;
-   end
-   else
-   begin
-    n = n - m;
-   end;
-  end
-  until (m!= n);
+    if(m==n) then
+        begin
+            print m;
+        end
+    else
+        begin
+            repeat
+            begin
+                if(m>n) then
+                    begin
+                        m = m - n;
+                    end
+                else
+                    begin
+                        n = n - m;
+                    end;
+            end
+            until (m!= n);
 
-  print m;
- end;
+        print m;
+        end;
 end

@@ -1,0 +1,9 @@
+program fml
+begin
+int m =5;
+int n=6;
+print m;
+m=m+6;
+print m;
+m=n+m+n+2;
+end
