@@ -691,12 +691,13 @@ BOOLE:
     E_BFIS 
     {
         printf("MOV ECX, EAX\n");
+        SAME_INSTRUCTION = 0;
     }
     TOK_EQU E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-			printf("CMP EAX, ECX\n");
+			printf("CMP ECX, EAX\n");
 		    $$ = 0;
 		}
 		else
@@ -717,7 +718,7 @@ BOOLE:
 		if($1->getType()==$4->getType())
 		{
             $$=1;
-		    printf("CMP EAX, ECX\n");
+		    printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -730,6 +731,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    	    SAME_INSTRUCTION = 0;
 	} 
 	TOK_GTR E_BFIS
 	{
@@ -749,6 +751,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    	    SAME_INSTRUCTION = 0;
 	} 
 	 TOK_LSS E_BFIS
 	{
@@ -769,6 +772,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    	    SAME_INSTRUCTION = 0;
 	} 
 	  TOK_LEQ E_BFIS
 	{
@@ -788,6 +792,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    	    SAME_INSTRUCTION = 0;
 	} 
 	TOK_GEQ E_BFIS
 	{
@@ -813,27 +818,27 @@ TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE
 {
 	    if($6==0)// ==
 	    {
-	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	        printf("JE BLOCK_%d \n",repeat_stack.top());
 	    }
 	    if($6==1)// !=
 	    {
-	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	        printf("JNE BLOCK_%d \n",repeat_stack.top());
 	    }
 	    if($6==2)// <
 	    {
-	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	        printf("JL BLOCK_%d \n",repeat_stack.top());
 	    }
 	    if($6==3)// >
 	    {
-	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	        printf("JG BLOCK_%d \n",repeat_stack.top());
 	    }
 	    if($6==4)// <=
 	    {
-	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	        printf("JLE BLOCK_%d \n",repeat_stack.top());
 	    }
 	    if($6==5)// >=
 	    {
-	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	        printf("JGE BLOCK_%d \n",repeat_stack.top());
 	    }
 	    repeat_stack.pop();
 } 
