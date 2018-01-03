@@ -9,6 +9,7 @@ int SAME_INSTRUCTION = 0;
 int block_count = 0;
 int repeat_count = 0;
 int var_count = 0;
+int string_count = 0;
 
 FILE * yyies = NULL;
 
@@ -57,6 +58,7 @@ public:
 	void setValue(char* n, float v);
 	void setValue(char* n, bool v);
 	void setValue(char* n, char* v);
+	void printall();
 };
 
 TVAR* TVAR::head;
@@ -166,7 +168,7 @@ int TVAR::getType(char* n)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return 0;
 }
 
 void TVAR::setValue(char* n, int v)
@@ -241,10 +243,29 @@ int TVAR::isInitialized(char* n)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return 0;
+}
+
+void TVAR::printall()
+{
+	TVAR* tmp = TVAR::head;
+	while (tmp != NULL)
+	{
+		fprintf(yyies, "%s:\t\t\t", tmp->nume);
+		if(tmp->tip == 2)
+		{
+		    fprintf(yyies, ".word 0\n");
+		}
+		if(tmp->tip == 3)
+		{
+		    fprintf(yyies, ".asciiz %s\n", tmp->val_string);
+		}
+		tmp = tmp->next;
+	}
 }
 
 TVAR* ts = NULL;
+
 class GenericValue
 {
 	int tip;
@@ -344,6 +365,7 @@ GenericValue* gv=new GenericValue();
 
 %left TOK_PLUS TOK_MINUS
 %left TOK_MULTIPLY TOK_DIVIDE
+%left TOK_LEFT TOK_RIGHT
 
 %nonassoc ifx
 %nonassoc TOK_ELSE
@@ -359,11 +381,13 @@ S :
     ;
 B : {
 	printf("\nBLOCK_%d:\n", ++block_count);
+    fprintf(yyies, "BLOCK_%d:\n",block_count);
 	block_stack.push(block_count);
 	}
 TOK_BEGIN INST TOK_END
     {
 	printf("E_BLOCK_%d:\n\n", block_stack.top());
+	fprintf(yyies, "E_BLOCK_%d:\n",block_stack.top());
 	block_stack.pop();
 	}
 	;
@@ -380,6 +404,7 @@ INST:
 I : IFDECL %prec ifx
 {
 	printf("BLOCK_%d:\n\n", ++block_count);
+    fprintf(yyies, "BLOCK_%d:\n",block_count);
 	block_count++;
 }
 	|
@@ -410,6 +435,7 @@ I : IFDECL %prec ifx
 					{
 						ts->setValue($1, *(int*)$4->getValue());
 						printf("MOV [%s], EAX\n", $1);
+						fprintf(yyies, "\tsw\t$t0, %s\n", $1);
 					}
 					if(ts->getType($1)==3)
 					{
@@ -476,6 +502,7 @@ I : IFDECL %prec ifx
 	    if($1==2)
 	    {
 	        printf("MOV [%s], EAX\n", $2);
+	        fprintf(yyies, "\tsw\t$t0, %s\n", $2);
 	    	if($4->getType()==2)
 			{
 				ts->setValue($2, *(int*)$4->getValue());
@@ -544,6 +571,7 @@ I : IFDECL %prec ifx
 	    	if($4->getType()==2)
 			{
 			    printf("MOV [%s], EAX\n", $2);
+			    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
 				ts->setValue($2, *(int*)$4->getValue());
 			}
 			else
@@ -593,62 +621,77 @@ I : IFDECL %prec ifx
 	|
     TOK_PRINT TOK_VARIABLE
     {
-	if(ts != NULL)
-	{
-	  if(ts->exists($2) == 1)
-	  {
-	    if(ts->isInitialized($2) == 0)
+	    if(ts != NULL)
 	    {
-	      sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost initializata!", @1.first_line, @1.first_column, $2);
-	      yyerror(msg);
-	      YYERROR;
+	      if(ts->exists($2) == 1)
+	      {
+	        if(ts->isInitialized($2) == 0)
+	        {
+	          sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost initializata!", @1.first_line, @1.first_column, $2);
+	          yyerror(msg);
+	          YYERROR;
+	        }
+	        else
+	        {
+	        if(ts->getType($2)==3)
+		    {
+			    printf("It's a string! %s\n",*(char**)ts->getValue($2));
+			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
+			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+		    }
+		    if(ts->getType($2)==2)
+		    {
+			    printf("It's an int! %d\n",*(int*)ts->getValue($2));
+			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
+			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+		    }
+		    if(ts->getType($2)==1)
+		    {
+			    printf("It's a float! %g\n",*(float*)ts->getValue($2));
+		    }
+		    if(ts->getType($2)==0)
+		    {
+			    if(*(bool*)ts->getValue($2))
+			    printf("It's a bool! true\n");
+			    else
+			    printf("It's a bool! false\n");
+		    }
+	        }
+	      }
+	      else
+	      {
+	        sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $2);
+	        yyerror(msg);
+	        YYERROR;
+	      }
 	    }
 	    else
 	    {
-	    if(ts->getType($2)==3)
-		{
-			printf("It's a string! %s\n",*(char**)ts->getValue($2));
-			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
-			fprintf(yyies, "\tla\t$a0, new_line\n\tli\t$v0, 4\n\tsyscall\n");
-		}
-		if(ts->getType($2)==2)
-		{
-			printf("It's an int! %d\n",*(int*)ts->getValue($2));
-			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
-		}
-		if(ts->getType($2)==1)
-		{
-			printf("It's a float! %g\n",*(float*)ts->getValue($2));
-		}
-		if(ts->getType($2)==0)
-		{
-			if(*(bool*)ts->getValue($2))
-			printf("It's a bool! true\n");
-			else
-			printf("It's a bool! false\n");
-		}
+	      sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $2);
+	      yyerror(msg);
+	      YYERROR;
 	    }
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $2);
-	    yyerror(msg);
-	    YYERROR;
-	  }
 	}
-	else
+	|
+	TOK_PRINT TOK_STRING_VALUE
 	{
-	  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $2);
-	  yyerror(msg);
-	  YYERROR;
-	}
-	
-}
+	    char internal_name[50];
+	    sprintf(internal_name, "cgs%d", string_count++);
+	    if(ts==NULL)
+	    {
+	        ts=new TVAR();
+	    }
+	    ts->add(internal_name, 3);
+	    ts->setValue(internal_name, $2);
+	    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", internal_name);
+	    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+    }
     ;
 ELSEDECL:
     {
         printf("#ELSE\n");
 		printf("JMP E_BLOCK_%d\n", block_count + 1);
+		fprintf(yyies, "\tb\tE_BLOCK_%d\n",block_count+1);
 	}
     TOK_ELSE B
 
@@ -663,26 +706,32 @@ IFDECL:
 	    if($4==0)// ==
 	    {
 	        printf("JNE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbne\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if($4==1)// !=
 	    {
 	        printf("JE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbeq\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if($4==2)// <
 	    {
 	        printf("JGE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbge\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if($4==3)// >
 	    {
 	        printf("JLE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tble\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if($4==4)// <=
 	    {
 	        printf("JG BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbgt\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if($4==5)// >=
 	    {
 	        printf("JL BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	}TOK_RIGHT TOK_THEN B
 	;
@@ -691,6 +740,7 @@ BOOLE:
     E_BFIS 
     {
         printf("MOV ECX, EAX\n");
+        fprintf(yyies, "\tmove\t$t2, $t0\n");
         SAME_INSTRUCTION = 0;
     }
     TOK_EQU E_BFIS
@@ -711,6 +761,7 @@ BOOLE:
 	E_BFIS 
 	{
 	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
 	    SAME_INSTRUCTION = 0;
 	}
 	TOK_NEQ E_BFIS
@@ -731,6 +782,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
 	    	    SAME_INSTRUCTION = 0;
 	} 
 	TOK_GTR E_BFIS
@@ -751,6 +803,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
 	    	    SAME_INSTRUCTION = 0;
 	} 
 	 TOK_LSS E_BFIS
@@ -759,7 +812,7 @@ BOOLE:
 		{
 		    $$ =2 ;
 			printf("CMP ECX, EAX\n");
-		    printf("JGE BLOCK_%d \n",block_count+2);
+// !--------printf("JGE BLOCK_%d \n",block_count+2);
 		}
 		else
 		{
@@ -772,6 +825,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
 	    	    SAME_INSTRUCTION = 0;
 	} 
 	  TOK_LEQ E_BFIS
@@ -792,6 +846,7 @@ BOOLE:
 	E_BFIS
 	{
 	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
 	    	    SAME_INSTRUCTION = 0;
 	} 
 	TOK_GEQ E_BFIS
@@ -818,27 +873,33 @@ TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE
 {
 	    if($6==0)// ==
 	    {
-	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbne\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if($6==1)// !=
 	    {
-	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbeq\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if($6==2)// <
 	    {
-	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbge\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if($6==3)// >
 	    {
-	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tble\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if($6==4)// <=
 	    {
-	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbgt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if($6==5)// >=
 	    {
-	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    repeat_stack.pop();
 } 
@@ -851,6 +912,7 @@ E_BFIS: TOK_INT_VALUE
     if(!SAME_INSTRUCTION)
 	{
 			    	printf("MOV EAX, %d\n", $1);
+			    	fprintf(yyies, "\tli\t$t0, %d\n", $1);
 	}
 	SAME_INSTRUCTION++;
 }
@@ -883,26 +945,32 @@ E_BFIS: TOK_INT_VALUE
 					if($1->is_variable==1)
 					{
 						printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
 				if($3->is_variable==1)
 				{
 					printf("ADD EAX, [%s]\n", $3->var_name.c_str());
+					fprintf(yyies, "\tlw\t$t1, %s\n", $3->var_name.c_str());
+					fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
 				}
 				else
 				{
 					if($3->is_in_eax!=1)
 					{
 						printf("ADD EAX, %d\n", *(int*)$3->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$3->getValue());
 					}
 					else
 					{
 						printf("ADD EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
 					}
 				}
 			}
@@ -933,26 +1001,32 @@ E_BFIS: TOK_INT_VALUE
 					if($1->is_variable==1)
 					{
 						printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
 				if($3->is_variable==1)
 				{
 					printf("SUB EAX, [%s]\n", $3->var_name.c_str());
+					fprintf(yyies, "\tlw\t$t1, %s\n", $3->var_name.c_str());
+					fprintf(yyies, "\tsub\t$t0, $t0, $t1\n");
 				}
 				else
 				{
 					if($3->is_in_eax!=1)
 					{
 						printf("SUB EAX, %d\n", *(int*)$3->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)$3->getValue());
 					}
 					else
 					{
 						printf("!!SUB EAX, %d\n", *(int*)$3->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)$3->getValue());
 					}
 					
 				}
@@ -983,18 +1057,13 @@ E_BFIS: TOK_INT_VALUE
 				{
 					if($1->is_variable==1)
 					{
-						if(var_count % 2 == 0)
-						{
-							printf("MOV EAX, EBX\n");
-						}
-						else
-						{
-							printf("MOV EAX, ECX\n");
-						}
+						printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -1168,6 +1237,7 @@ E_BFIS: TOK_INT_VALUE
 				if(!SAME_INSTRUCTION)
 				{
 			    	printf("MOV EAX, [%s]\n", $1);
+			    	fprintf(yyies, "\tlw\t$t0, %s\n", $1);
 			    }
 			    SAME_INSTRUCTION++;
 			}
@@ -1196,6 +1266,11 @@ int main()
 	
 	yyparse();
 	
+	fprintf(yyies, "\tli\t$v0, 10\n\tsyscall\n"); // exit sequence
+	fprintf(yyies, "\t.data\n");
+	ts->printall();
+	fprintf(yyies, "crlf:\t\t\t.asciiz \"\\n\"\n");
+	fprintf(yyies, "\n");
 	fclose(yyies);
 	
 	if(EsteCorecta == 1)

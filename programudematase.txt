@@ -1,7 +1,7 @@
 program exemplulmeu
 begin
-    int m = 34;
-    int n = 17;
+    int m = 12;
+    int n = 28;
 
     if(m==n) then
         begin
@@ -20,8 +20,8 @@ begin
                         n = n - m;
                     end;
             end
-            until (m!= n);
-
+            until (m== n);
+        print "GCD is:";
         print m;
         end;
 end

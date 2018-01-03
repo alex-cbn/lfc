@@ -1,38 +1,14 @@
 program kurwa
 begin
     int m=4;
-    print m;
-    if (m+2!=3) then
+    int n=2;
+    m=m-n;
+    if (m > n) then
         begin
-            repeat
-                begin
-                    m=m+1;
-                    if (2==3) then
-                        begin
-                            m=m+1;
-                        end
-                    else
-                        begin
-                            m=m-1;
-                        end;
-                end
-            until(2==3);
+            print m;
         end
-        else
+    else
         begin
-            repeat
-                begin
-                    m=m+1;
-                    if (2==3) then
-                        begin
-                            m=m+1;
-                        end
-                    else
-                        begin
-                            m=m-1;
-                        end;
-                end
-            until(2==3);
+            print n;
         end;
-    print m;
 end

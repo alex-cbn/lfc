@@ -1,0 +1,6 @@
+program kurwa
+begin
+    int m=4;
+    m=m+2-3+m+m+2;
+    print m;
+end

@@ -74,6 +74,7 @@ int SAME_INSTRUCTION = 0;
 int block_count = 0;
 int repeat_count = 0;
 int var_count = 0;
+int string_count = 0;
 
 FILE * yyies = NULL;
 
@@ -122,6 +123,7 @@ public:
 	void setValue(char* n, float v);
 	void setValue(char* n, bool v);
 	void setValue(char* n, char* v);
+	void printall();
 };
 
 TVAR* TVAR::head;
@@ -231,7 +233,7 @@ int TVAR::getType(char* n)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return 0;
 }
 
 void TVAR::setValue(char* n, int v)
@@ -306,10 +308,29 @@ int TVAR::isInitialized(char* n)
 		}
 		tmp = tmp->next;
 	}
-	return NULL;
+	return 0;
+}
+
+void TVAR::printall()
+{
+	TVAR* tmp = TVAR::head;
+	while (tmp != NULL)
+	{
+		fprintf(yyies, "%s:\t\t\t", tmp->nume);
+		if(tmp->tip == 2)
+		{
+		    fprintf(yyies, ".word 0\n");
+		}
+		if(tmp->tip == 3)
+		{
+		    fprintf(yyies, ".asciiz %s\n", tmp->val_string);
+		}
+		tmp = tmp->next;
+	}
 }
 
 TVAR* ts = NULL;
+
 class GenericValue
 {
 	int tip;
@@ -388,7 +409,7 @@ void GenericValue::setValue(char* v)
 GenericValue* gv=new GenericValue();
 
 
-#line 392 "y.tab.c" /* yacc.c:339  */
+#line 413 "y.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -492,10 +513,10 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 328 "tema2.y" /* yacc.c:355  */
+#line 349 "tema2.y" /* yacc.c:355  */
  char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;
 
-#line 499 "y.tab.c" /* yacc.c:355  */
+#line 520 "y.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -526,7 +547,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 530 "y.tab.c" /* yacc.c:358  */
+#line 551 "y.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -770,16 +791,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  6
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   81
+#define YYLAST   80
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  35
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  25
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  49
+#define YYNRULES  50
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  86
+#define YYNSTATES  87
 
 /* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
    by yylex, with out-of-bounds checking.  */
@@ -828,11 +849,12 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   353,   353,   355,   357,   360,   360,   370,   372,   376,
-     372,   380,   386,   388,   391,   390,   441,   572,   594,   649,
-     649,   657,   662,   657,   692,   691,   712,   711,   732,   731,
-     752,   751,   773,   772,   793,   792,   813,   818,   813,   847,
-     859,   861,   863,   865,   867,   917,   968,  1032,  1121,  1143
+       0,   375,   375,   377,   379,   382,   382,   394,   396,   400,
+     396,   404,   411,   413,   416,   415,   467,   600,   622,   676,
+     691,   691,   700,   705,   700,   741,   740,   762,   761,   783,
+     782,   804,   803,   826,   825,   847,   846,   868,   873,   868,
+     908,   921,   923,   925,   927,   929,   985,  1042,  1101,  1190,
+    1212
 };
 #endif
 
@@ -866,12 +888,12 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -30
+#define YYPACT_NINF -31
 
 #define yypact_value_is_default(Yystate) \
-  (!!((Yystate) == (-30)))
+  (!!((Yystate) == (-31)))
 
-#define YYTABLE_NINF -37
+#define YYTABLE_NINF -38
 
 #define yytable_value_is_error(Yytable_value) \
   0
@@ -880,15 +902,15 @@ static const yytype_uint16 yytoknum[] =
      STATE-NUM.  */
 static const yytype_int8 yypact[] =
 {
-      52,   -16,   -10,    32,    52,   -30,   -30,   -30,   -30,    22,
-      23,    37,   -17,   -30,    24,    25,   -30,   -30,    38,    40,
-     -30,    43,   -30,    28,    29,    31,   -30,    45,    50,   -30,
-       1,     1,    23,   -30,     1,    46,     1,   -30,   -30,   -30,
-     -30,   -30,   -30,    44,    44,   -30,   -30,   -30,     6,    59,
-      30,     1,     1,     1,     1,    60,    57,    61,    58,    62,
-      63,    64,     1,   -30,     0,     0,   -30,   -30,    48,     1,
-       1,     1,     1,     1,     1,   -30,   -30,    44,    44,    44,
-      44,    44,    44,    65,   -30,   -30
+      52,   -16,   -10,    32,    52,   -31,   -31,   -31,   -31,    38,
+      39,    40,   -17,   -31,     8,    26,   -31,   -31,    41,    43,
+     -31,    42,   -31,   -31,    25,    27,    31,   -31,    45,    57,
+     -31,     1,     1,    39,   -31,     1,    48,     1,   -31,   -31,
+     -31,   -31,   -31,   -31,    44,    44,   -31,   -31,   -31,     6,
+      60,    30,     1,     1,     1,     1,    61,    58,    62,    59,
+      63,    64,    65,     1,   -31,     0,     0,   -31,   -31,    49,
+       1,     1,     1,     1,     1,     1,   -31,   -31,    44,    44,
+      44,    44,    44,    44,    66,   -31,   -31
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -897,30 +919,30 @@ static const yytype_int8 yypact[] =
 static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     0,     0,     5,     1,     4,     3,     0,
-       8,     0,    21,     6,     0,     0,    14,     9,    11,     0,
-      13,     0,    18,    17,     0,     0,    12,     0,     0,     5,
-       0,     0,     8,     5,     0,     0,     0,    39,    40,    42,
-      43,    41,    49,    16,    15,    10,    20,    22,    24,     0,
+       8,     0,    22,     6,     0,     0,    14,     9,    11,     0,
+      13,     0,    19,    18,    17,     0,     0,    12,     0,     0,
+       5,     0,     0,     8,     5,     0,     0,     0,    40,    41,
+      43,    44,    42,    50,    16,    15,    10,    21,    23,    25,
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,    48,    44,    45,    46,    47,     0,     0,
-       0,     0,     0,     0,     0,    37,     5,    25,    27,    29,
-      31,    33,    35,     0,    23,    38
+       0,     0,     0,     0,    49,    45,    46,    47,    48,     0,
+       0,     0,     0,     0,     0,     0,    38,     5,    26,    28,
+      30,    32,    34,    36,     0,    24,    39
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int8 yypgoto[] =
 {
-     -30,    69,   -29,   -30,    49,   -30,   -30,   -30,   -30,   -30,
-     -30,   -30,   -30,   -30,    14,   -30,   -30,   -30,   -30,   -30,
-     -30,   -30,   -30,   -30,   -28
+     -31,    70,   -30,   -31,    46,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,    14,   -31,   -31,   -31,   -31,   -31,
+     -31,   -31,   -31,   -31,   -29
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const yytype_int8 yydefgoto[] =
 {
-      -1,     3,     8,     9,    11,    12,    25,    17,    24,    26,
-      27,    18,    19,    55,    47,    56,    57,    58,    59,    60,
-      61,    20,    21,    83,    48
+      -1,     3,     8,     9,    11,    12,    26,    17,    25,    27,
+      28,    18,    19,    56,    48,    57,    58,    59,    60,    61,
+      62,    20,    21,    84,    49
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -928,28 +950,28 @@ static const yytype_int8 yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_int8 yytable[] =
 {
-      35,   -36,    43,    44,    46,    14,    53,    54,    50,    36,
-      51,    52,    53,    54,    15,    16,   -26,     4,   -28,   -30,
-     -32,   -34,     5,    64,    65,    66,    67,    37,    38,    39,
-      40,    41,     6,    42,    51,    52,    53,    54,    10,    63,
-      -7,    77,    78,    79,    80,    81,    82,    84,    51,    52,
-      53,    54,    -2,     1,    13,     2,    22,    23,    34,   -19,
-      28,    29,    30,    31,    32,    49,    33,    62,    69,    68,
-      71,    70,    76,     7,    85,    72,    75,    73,     0,    74,
-       0,    45
+      36,   -37,    44,    45,    47,    14,    54,    55,    51,    37,
+      52,    53,    54,    55,    15,    16,   -27,     4,   -29,   -31,
+     -33,   -35,     5,    65,    66,    67,    68,    38,    39,    40,
+      41,    42,     6,    43,    52,    53,    54,    55,    22,    64,
+      23,    78,    79,    80,    81,    82,    83,    85,    52,    53,
+      54,    55,    -2,     1,    10,     2,    -7,    13,    24,    31,
+      30,    32,   -20,    29,    33,    35,    34,    50,    63,    70,
+      69,    72,    71,    77,     7,    86,    73,    76,    74,    46,
+      75
 };
 
-static const yytype_int8 yycheck[] =
+static const yytype_uint8 yycheck[] =
 {
-      29,    18,    30,    31,    33,    22,     6,     7,    36,     8,
+      30,    18,    31,    32,    34,    22,     6,     7,    37,     8,
        4,     5,     6,     7,    31,    32,    10,    33,    12,    13,
-      14,    15,    32,    51,    52,    53,    54,    26,    27,    28,
-      29,    30,     0,    32,     4,     5,     6,     7,    16,     9,
-      17,    69,    70,    71,    72,    73,    74,    76,     4,     5,
-       6,     7,     0,     1,    17,     3,    32,    32,     8,    21,
-      20,    18,    34,    34,    33,    19,    21,     8,    11,     9,
-      12,    10,    24,     4,     9,    13,    62,    14,    -1,    15,
-      -1,    32
+      14,    15,    32,    52,    53,    54,    55,    26,    27,    28,
+      29,    30,     0,    32,     4,     5,     6,     7,    30,     9,
+      32,    70,    71,    72,    73,    74,    75,    77,     4,     5,
+       6,     7,     0,     1,    16,     3,    17,    17,    32,    34,
+      18,    34,    21,    20,    33,     8,    21,    19,     8,    11,
+       9,    12,    10,    24,     4,     9,    13,    63,    14,    33,
+      15
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
@@ -958,33 +980,35 @@ static const yytype_uint8 yystos[] =
 {
        0,     1,     3,    36,    33,    32,     0,    36,    37,    38,
       16,    39,    40,    17,    22,    31,    32,    42,    46,    47,
-      56,    57,    32,    32,    43,    41,    44,    45,    20,    18,
-      34,    34,    33,    21,     8,    37,     8,    26,    27,    28,
-      29,    30,    32,    59,    59,    39,    37,    49,    59,    19,
-      59,     4,     5,     6,     7,    48,    50,    51,    52,    53,
-      54,    55,     8,     9,    59,    59,    59,    59,     9,    11,
-      10,    12,    13,    14,    15,    49,    24,    59,    59,    59,
-      59,    59,    59,    58,    37,     9
+      56,    57,    30,    32,    32,    43,    41,    44,    45,    20,
+      18,    34,    34,    33,    21,     8,    37,     8,    26,    27,
+      28,    29,    30,    32,    59,    59,    39,    37,    49,    59,
+      19,    59,     4,     5,     6,     7,    48,    50,    51,    52,
+      53,    54,    55,     8,     9,    59,    59,    59,    59,     9,
+      11,    10,    12,    13,    14,    15,    49,    24,    59,    59,
+      59,    59,    59,    59,    58,    37,     9
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
 static const yytype_uint8 yyr1[] =
 {
        0,    35,    36,    36,    36,    38,    37,    39,    40,    41,
-      39,    42,    42,    42,    43,    42,    42,    42,    42,    45,
-      44,    47,    48,    46,    50,    49,    51,    49,    52,    49,
-      53,    49,    54,    49,    55,    49,    57,    58,    56,    59,
-      59,    59,    59,    59,    59,    59,    59,    59,    59,    59
+      39,    42,    42,    42,    43,    42,    42,    42,    42,    42,
+      45,    44,    47,    48,    46,    50,    49,    51,    49,    52,
+      49,    53,    49,    54,    49,    55,    49,    57,    58,    56,
+      59,    59,    59,    59,    59,    59,    59,    59,    59,    59,
+      59
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
 static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     3,     3,     0,     4,     0,     0,     0,
-       5,     1,     2,     1,     0,     4,     4,     2,     2,     0,
-       3,     0,     0,     8,     0,     4,     0,     4,     0,     4,
-       0,     4,     0,     4,     0,     4,     0,     0,     8,     1,
-       1,     1,     1,     1,     3,     3,     3,     3,     3,     1
+       5,     1,     2,     1,     0,     4,     4,     2,     2,     2,
+       0,     3,     0,     0,     8,     0,     4,     0,     4,     0,
+       4,     0,     4,     0,     4,     0,     4,     0,     0,     8,
+       1,     1,     1,     1,     1,     3,     3,     3,     3,     3,
+       1
 };
 
 
@@ -1754,64 +1778,67 @@ yyreduce:
   switch (yyn)
     {
         case 4:
-#line 358 "tema2.y" /* yacc.c:1646  */
+#line 380 "tema2.y" /* yacc.c:1646  */
     { EsteCorecta = 0; }
-#line 1760 "y.tab.c" /* yacc.c:1646  */
+#line 1784 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 360 "tema2.y" /* yacc.c:1646  */
+#line 382 "tema2.y" /* yacc.c:1646  */
     {
 	printf("\nBLOCK_%d:\n", ++block_count);
+    fprintf(yyies, "BLOCK_%d:\n",block_count);
 	block_stack.push(block_count);
-	}
-#line 1769 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 6:
-#line 365 "tema2.y" /* yacc.c:1646  */
-    {
-	printf("E_BLOCK_%d:\n\n", block_stack.top());
-	block_stack.pop();
-	}
-#line 1778 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 8:
-#line 372 "tema2.y" /* yacc.c:1646  */
-    {
-	SAME_INSTRUCTION = 0;
-	}
-#line 1786 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 9:
-#line 376 "tema2.y" /* yacc.c:1646  */
-    {
-	SAME_INSTRUCTION = 0;
 	}
 #line 1794 "y.tab.c" /* yacc.c:1646  */
     break;
 
+  case 6:
+#line 388 "tema2.y" /* yacc.c:1646  */
+    {
+	printf("E_BLOCK_%d:\n\n", block_stack.top());
+	fprintf(yyies, "E_BLOCK_%d:\n",block_stack.top());
+	block_stack.pop();
+	}
+#line 1804 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 396 "tema2.y" /* yacc.c:1646  */
+    {
+	SAME_INSTRUCTION = 0;
+	}
+#line 1812 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 9:
+#line 400 "tema2.y" /* yacc.c:1646  */
+    {
+	SAME_INSTRUCTION = 0;
+	}
+#line 1820 "y.tab.c" /* yacc.c:1646  */
+    break;
+
   case 11:
-#line 381 "tema2.y" /* yacc.c:1646  */
+#line 405 "tema2.y" /* yacc.c:1646  */
     {
 	printf("BLOCK_%d:\n\n", ++block_count);
+    fprintf(yyies, "BLOCK_%d:\n",block_count);
 	block_count++;
 }
-#line 1803 "y.tab.c" /* yacc.c:1646  */
+#line 1830 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 391 "tema2.y" /* yacc.c:1646  */
+#line 416 "tema2.y" /* yacc.c:1646  */
     {
         SAME_INSTRUCTION = 0;	
 	}
-#line 1811 "y.tab.c" /* yacc.c:1646  */
+#line 1838 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 394 "tema2.y" /* yacc.c:1646  */
+#line 419 "tema2.y" /* yacc.c:1646  */
     {
 		if(ts != NULL)
 		{
@@ -1831,6 +1858,7 @@ yyreduce:
 					{
 						ts->setValue((yyvsp[-3].name), *(int*)(yyvsp[0].val_generic)->getValue());
 						printf("MOV [%s], EAX\n", (yyvsp[-3].name));
+						fprintf(yyies, "\tsw\t$t0, %s\n", (yyvsp[-3].name));
 					}
 					if(ts->getType((yyvsp[-3].name))==3)
 					{
@@ -1858,11 +1886,11 @@ yyreduce:
 			YYERROR;
 		}
 	}
-#line 1862 "y.tab.c" /* yacc.c:1646  */
+#line 1890 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 442 "tema2.y" /* yacc.c:1646  */
+#line 468 "tema2.y" /* yacc.c:1646  */
     {
     SAME_INSTRUCTION = 0;
 	if(ts != NULL)
@@ -1900,6 +1928,7 @@ yyreduce:
 	    if((yyvsp[-3].val_int)==2)
 	    {
 	        printf("MOV [%s], EAX\n", (yyvsp[-2].name));
+	        fprintf(yyies, "\tsw\t$t0, %s\n", (yyvsp[-2].name));
 	    	if((yyvsp[0].val_generic)->getType()==2)
 			{
 				ts->setValue((yyvsp[-2].name), *(int*)(yyvsp[0].val_generic)->getValue());
@@ -1968,6 +1997,7 @@ yyreduce:
 	    	if((yyvsp[0].val_generic)->getType()==2)
 			{
 			    printf("MOV [%s], EAX\n", (yyvsp[-2].name));
+			    fprintf(yyies, "\tsw\t$t0, %s\n", (yyvsp[-2].name));
 				ts->setValue((yyvsp[-2].name), *(int*)(yyvsp[0].val_generic)->getValue());
 			}
 			else
@@ -1992,11 +2022,11 @@ yyreduce:
 	    }
 	}
     }
-#line 1996 "y.tab.c" /* yacc.c:1646  */
+#line 2026 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 573 "tema2.y" /* yacc.c:1646  */
+#line 601 "tema2.y" /* yacc.c:1646  */
     {
     if(ts != NULL)
     {
@@ -2017,126 +2047,151 @@ yyreduce:
     	ts->add((yyvsp[0].name), (yyvsp[-1].val_int));
     }
     }
-#line 2021 "y.tab.c" /* yacc.c:1646  */
+#line 2051 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 595 "tema2.y" /* yacc.c:1646  */
+#line 623 "tema2.y" /* yacc.c:1646  */
     {
-	if(ts != NULL)
-	{
-	  if(ts->exists((yyvsp[0].name)) == 1)
-	  {
-	    if(ts->isInitialized((yyvsp[0].name)) == 0)
+	    if(ts != NULL)
 	    {
-	      sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost initializata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
-	      yyerror(msg);
-	      YYERROR;
+	      if(ts->exists((yyvsp[0].name)) == 1)
+	      {
+	        if(ts->isInitialized((yyvsp[0].name)) == 0)
+	        {
+	          sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost initializata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
+	          yyerror(msg);
+	          YYERROR;
+	        }
+	        else
+	        {
+	        if(ts->getType((yyvsp[0].name))==3)
+		    {
+			    printf("It's a string! %s\n",*(char**)ts->getValue((yyvsp[0].name)));
+			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
+			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+		    }
+		    if(ts->getType((yyvsp[0].name))==2)
+		    {
+			    printf("It's an int! %d\n",*(int*)ts->getValue((yyvsp[0].name)));
+			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
+			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+		    }
+		    if(ts->getType((yyvsp[0].name))==1)
+		    {
+			    printf("It's a float! %g\n",*(float*)ts->getValue((yyvsp[0].name)));
+		    }
+		    if(ts->getType((yyvsp[0].name))==0)
+		    {
+			    if(*(bool*)ts->getValue((yyvsp[0].name)))
+			    printf("It's a bool! true\n");
+			    else
+			    printf("It's a bool! false\n");
+		    }
+	        }
+	      }
+	      else
+	      {
+	        sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
+	        yyerror(msg);
+	        YYERROR;
+	      }
 	    }
 	    else
 	    {
-	    if(ts->getType((yyvsp[0].name))==3)
-		{
-			printf("It's a string! %s\n",*(char**)ts->getValue((yyvsp[0].name)));
-			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
-			fprintf(yyies, "\tla\t$a0, new_line\n\tli\t$v0, 4\n\tsyscall\n");
-		}
-		if(ts->getType((yyvsp[0].name))==2)
-		{
-			printf("It's an int! %d\n",*(int*)ts->getValue((yyvsp[0].name)));
-			fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
-		}
-		if(ts->getType((yyvsp[0].name))==1)
-		{
-			printf("It's a float! %g\n",*(float*)ts->getValue((yyvsp[0].name)));
-		}
-		if(ts->getType((yyvsp[0].name))==0)
-		{
-			if(*(bool*)ts->getValue((yyvsp[0].name)))
-			printf("It's a bool! true\n");
-			else
-			printf("It's a bool! false\n");
-		}
+	      sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
+	      yyerror(msg);
+	      YYERROR;
 	    }
-	  }
-	  else
-	  {
-	    sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
-	    yyerror(msg);
-	    YYERROR;
-	  }
 	}
-	else
-	{
-	  sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", (yylsp[-1]).first_line, (yylsp[-1]).first_column, (yyvsp[0].name));
-	  yyerror(msg);
-	  YYERROR;
-	}
-	
-}
-#line 2078 "y.tab.c" /* yacc.c:1646  */
+#line 2108 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 649 "tema2.y" /* yacc.c:1646  */
+#line 677 "tema2.y" /* yacc.c:1646  */
+    {
+	    char internal_name[50];
+	    sprintf(internal_name, "cgs%d", string_count++);
+	    if(ts==NULL)
+	    {
+	        ts=new TVAR();
+	    }
+	    ts->add(internal_name, 3);
+	    ts->setValue(internal_name, (yyvsp[0].val_string));
+	    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", internal_name);
+	    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+    }
+#line 2125 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 691 "tema2.y" /* yacc.c:1646  */
     {
         printf("#ELSE\n");
 		printf("JMP E_BLOCK_%d\n", block_count + 1);
+		fprintf(yyies, "\tb\tE_BLOCK_%d\n",block_count+1);
 	}
-#line 2087 "y.tab.c" /* yacc.c:1646  */
+#line 2135 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 21:
-#line 657 "tema2.y" /* yacc.c:1646  */
+  case 22:
+#line 700 "tema2.y" /* yacc.c:1646  */
     {
 	    printf("#IF\n");
 		//printf("CMP EAX, ECX\n");
 	}
-#line 2096 "y.tab.c" /* yacc.c:1646  */
+#line 2144 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 662 "tema2.y" /* yacc.c:1646  */
+  case 23:
+#line 705 "tema2.y" /* yacc.c:1646  */
     {
 	    if((yyvsp[0].val_int)==0)// ==
 	    {
 	        printf("JNE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbne\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if((yyvsp[0].val_int)==1)// !=
 	    {
 	        printf("JE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbeq\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if((yyvsp[0].val_int)==2)// <
 	    {
 	        printf("JGE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbge\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if((yyvsp[0].val_int)==3)// >
 	    {
 	        printf("JLE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tble\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if((yyvsp[0].val_int)==4)// <=
 	    {
 	        printf("JG BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tbgt\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	    if((yyvsp[0].val_int)==5)// >=
 	    {
 	        printf("JL BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
 	}
-#line 2127 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 24:
-#line 692 "tema2.y" /* yacc.c:1646  */
-    {
-        printf("MOV ECX, EAX\n");
-        SAME_INSTRUCTION = 0;
-    }
-#line 2136 "y.tab.c" /* yacc.c:1646  */
+#line 2181 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 697 "tema2.y" /* yacc.c:1646  */
+#line 741 "tema2.y" /* yacc.c:1646  */
+    {
+        printf("MOV ECX, EAX\n");
+        fprintf(yyies, "\tmove\t$t2, $t0\n");
+        SAME_INSTRUCTION = 0;
+    }
+#line 2191 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 26:
+#line 747 "tema2.y" /* yacc.c:1646  */
     {
 		if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
@@ -2150,20 +2205,21 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2154 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 26:
-#line 712 "tema2.y" /* yacc.c:1646  */
-    {
-	    printf("MOV ECX, EAX\n");
-	    SAME_INSTRUCTION = 0;
-	}
-#line 2163 "y.tab.c" /* yacc.c:1646  */
+#line 2209 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 717 "tema2.y" /* yacc.c:1646  */
+#line 762 "tema2.y" /* yacc.c:1646  */
+    {
+	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
+	    SAME_INSTRUCTION = 0;
+	}
+#line 2219 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 28:
+#line 768 "tema2.y" /* yacc.c:1646  */
     {
 		if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
@@ -2177,20 +2233,21 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2181 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 28:
-#line 732 "tema2.y" /* yacc.c:1646  */
-    {
-	    printf("MOV ECX, EAX\n");
-	    	    SAME_INSTRUCTION = 0;
-	}
-#line 2190 "y.tab.c" /* yacc.c:1646  */
+#line 2237 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 737 "tema2.y" /* yacc.c:1646  */
+#line 783 "tema2.y" /* yacc.c:1646  */
+    {
+	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
+	    	    SAME_INSTRUCTION = 0;
+	}
+#line 2247 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 30:
+#line 789 "tema2.y" /* yacc.c:1646  */
     {
 		if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
@@ -2204,26 +2261,27 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2208 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 30:
-#line 752 "tema2.y" /* yacc.c:1646  */
-    {
-	    printf("MOV ECX, EAX\n");
-	    	    SAME_INSTRUCTION = 0;
-	}
-#line 2217 "y.tab.c" /* yacc.c:1646  */
+#line 2265 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 757 "tema2.y" /* yacc.c:1646  */
+#line 804 "tema2.y" /* yacc.c:1646  */
+    {
+	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
+	    	    SAME_INSTRUCTION = 0;
+	}
+#line 2275 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 810 "tema2.y" /* yacc.c:1646  */
     {
 		if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
 		    (yyval.val_int) =2 ;
 			printf("CMP ECX, EAX\n");
-		    printf("JGE BLOCK_%d \n",block_count+2);
+// !--------printf("JGE BLOCK_%d \n",block_count+2);
 		}
 		else
 		{
@@ -2232,20 +2290,21 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2236 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 32:
-#line 773 "tema2.y" /* yacc.c:1646  */
-    {
-	    printf("MOV ECX, EAX\n");
-	    	    SAME_INSTRUCTION = 0;
-	}
-#line 2245 "y.tab.c" /* yacc.c:1646  */
+#line 2294 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 778 "tema2.y" /* yacc.c:1646  */
+#line 826 "tema2.y" /* yacc.c:1646  */
+    {
+	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
+	    	    SAME_INSTRUCTION = 0;
+	}
+#line 2304 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 832 "tema2.y" /* yacc.c:1646  */
     {
 	if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
@@ -2259,20 +2318,21 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2263 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 34:
-#line 793 "tema2.y" /* yacc.c:1646  */
-    {
-	    printf("MOV ECX, EAX\n");
-	    	    SAME_INSTRUCTION = 0;
-	}
-#line 2272 "y.tab.c" /* yacc.c:1646  */
+#line 2322 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 798 "tema2.y" /* yacc.c:1646  */
+#line 847 "tema2.y" /* yacc.c:1646  */
+    {
+	    printf("MOV ECX, EAX\n");
+	    fprintf(yyies, "\tmove\t$t2, $t0\n");
+	    	    SAME_INSTRUCTION = 0;
+	}
+#line 2332 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 36:
+#line 853 "tema2.y" /* yacc.c:1646  */
     {
 		if((yyvsp[-3].val_generic)->getType()==(yyvsp[0].val_generic)->getType())
 		{
@@ -2286,90 +2346,97 @@ yyreduce:
 	  		YYERROR;
 		}
 	}
-#line 2290 "y.tab.c" /* yacc.c:1646  */
+#line 2350 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 36:
-#line 813 "tema2.y" /* yacc.c:1646  */
+  case 37:
+#line 868 "tema2.y" /* yacc.c:1646  */
     {
 	    repeat_count ++;
 	    repeat_stack.push(block_count+1);
 }
-#line 2299 "y.tab.c" /* yacc.c:1646  */
+#line 2359 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 37:
-#line 818 "tema2.y" /* yacc.c:1646  */
+  case 38:
+#line 873 "tema2.y" /* yacc.c:1646  */
     {
 	    if((yyvsp[0].val_int)==0)// ==
 	    {
-	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbne\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if((yyvsp[0].val_int)==1)// !=
 	    {
-	        printf("JNE BLOCK_%d \n",repeat_stack.top());
+	        printf("JE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbeq\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if((yyvsp[0].val_int)==2)// <
 	    {
-	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbge\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if((yyvsp[0].val_int)==3)// >
 	    {
-	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tble\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if((yyvsp[0].val_int)==4)// <=
 	    {
-	        printf("JLE BLOCK_%d \n",repeat_stack.top());
+	        printf("JG BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tbgt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    if((yyvsp[0].val_int)==5)// >=
 	    {
-	        printf("JGE BLOCK_%d \n",repeat_stack.top());
+	        printf("JL BLOCK_%d \n",repeat_stack.top());
+	        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 	    }
 	    repeat_stack.pop();
 }
-#line 2331 "y.tab.c" /* yacc.c:1646  */
+#line 2397 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 39:
-#line 848 "tema2.y" /* yacc.c:1646  */
+  case 40:
+#line 909 "tema2.y" /* yacc.c:1646  */
     {
     (yyval.val_generic) = new GenericValue();
     (yyval.val_generic)->setValue((yyvsp[0].val_int));
     if(!SAME_INSTRUCTION)
 	{
 			    	printf("MOV EAX, %d\n", (yyvsp[0].val_int));
+			    	fprintf(yyies, "\tli\t$t0, %d\n", (yyvsp[0].val_int));
 	}
 	SAME_INSTRUCTION++;
 }
-#line 2345 "y.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 40:
-#line 859 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
-#line 2351 "y.tab.c" /* yacc.c:1646  */
+#line 2412 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 861 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
-#line 2357 "y.tab.c" /* yacc.c:1646  */
+#line 921 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_float));}
+#line 2418 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 863 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(true);}
-#line 2363 "y.tab.c" /* yacc.c:1646  */
+#line 923 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
+#line 2424 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 865 "tema2.y" /* yacc.c:1646  */
-    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(false);}
-#line 2369 "y.tab.c" /* yacc.c:1646  */
+#line 925 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(true);}
+#line 2430 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 868 "tema2.y" /* yacc.c:1646  */
+#line 927 "tema2.y" /* yacc.c:1646  */
+    {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(false);}
+#line 2436 "y.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 45:
+#line 930 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
@@ -2388,26 +2455,32 @@ yyreduce:
 					if((yyvsp[-2].val_generic)->is_variable==1)
 					{
 						printf("MOV EAX, [%s]\n", (yyvsp[-2].val_generic)->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", (yyvsp[-2].val_generic)->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
 				if((yyvsp[0].val_generic)->is_variable==1)
 				{
 					printf("ADD EAX, [%s]\n", (yyvsp[0].val_generic)->var_name.c_str());
+					fprintf(yyies, "\tlw\t$t1, %s\n", (yyvsp[0].val_generic)->var_name.c_str());
+					fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
 				}
 				else
 				{
 					if((yyvsp[0].val_generic)->is_in_eax!=1)
 					{
 						printf("ADD EAX, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
 					}
 					else
 					{
 						printf("ADD EAX, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
 					}
 				}
 			}
@@ -2418,11 +2491,11 @@ yyreduce:
 			(yyval.val_generic)->is_in_eax=1;
 		}
 	}
-#line 2422 "y.tab.c" /* yacc.c:1646  */
+#line 2495 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 45:
-#line 918 "tema2.y" /* yacc.c:1646  */
+  case 46:
+#line 986 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
@@ -2441,26 +2514,32 @@ yyreduce:
 					if((yyvsp[-2].val_generic)->is_variable==1)
 					{
 						printf("MOV EAX, [%s]\n", (yyvsp[-2].val_generic)->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", (yyvsp[-2].val_generic)->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
 				if((yyvsp[0].val_generic)->is_variable==1)
 				{
 					printf("SUB EAX, [%s]\n", (yyvsp[0].val_generic)->var_name.c_str());
+					fprintf(yyies, "\tlw\t$t1, %s\n", (yyvsp[0].val_generic)->var_name.c_str());
+					fprintf(yyies, "\tsub\t$t0, $t0, $t1\n");
 				}
 				else
 				{
 					if((yyvsp[0].val_generic)->is_in_eax!=1)
 					{
 						printf("SUB EAX, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)(yyvsp[0].val_generic)->getValue());
 					}
 					else
 					{
 						printf("!!SUB EAX, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)(yyvsp[0].val_generic)->getValue());
 					}
 					
 				}
@@ -2472,11 +2551,11 @@ yyreduce:
 			(yyval.val_generic)->is_in_eax=1;
 		}
 	}
-#line 2476 "y.tab.c" /* yacc.c:1646  */
+#line 2555 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 46:
-#line 969 "tema2.y" /* yacc.c:1646  */
+  case 47:
+#line 1043 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
@@ -2494,18 +2573,13 @@ yyreduce:
 				{
 					if((yyvsp[-2].val_generic)->is_variable==1)
 					{
-						if(var_count % 2 == 0)
-						{
-							printf("MOV EAX, EBX\n");
-						}
-						else
-						{
-							printf("MOV EAX, ECX\n");
-						}
+						printf("MOV EAX, [%s]\n", (yyvsp[-2].val_generic)->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", (yyvsp[-2].val_generic)->var_name.c_str());
 					}
 					else
 					{
 						printf("MOV EAX, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -2539,11 +2613,11 @@ yyreduce:
 			(yyval.val_generic)->is_in_eax=1;
 		}
 	}
-#line 2543 "y.tab.c" /* yacc.c:1646  */
+#line 2617 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 47:
-#line 1033 "tema2.y" /* yacc.c:1646  */
+  case 48:
+#line 1102 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[0].val_generic)->getType()!=1 && (yyvsp[0].val_generic)->getType()!=2)
@@ -2631,11 +2705,11 @@ yyreduce:
 			
 		}
 	}
-#line 2635 "y.tab.c" /* yacc.c:1646  */
+#line 2709 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 48:
-#line 1122 "tema2.y" /* yacc.c:1646  */
+  case 49:
+#line 1191 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-1].val_generic)->getType()==0)
@@ -2656,11 +2730,11 @@ yyreduce:
 		}
 		
 	}
-#line 2660 "y.tab.c" /* yacc.c:1646  */
+#line 2734 "y.tab.c" /* yacc.c:1646  */
     break;
 
-  case 49:
-#line 1144 "tema2.y" /* yacc.c:1646  */
+  case 50:
+#line 1213 "tema2.y" /* yacc.c:1646  */
     {
 		if(ts != NULL)
 		{
@@ -2688,6 +2762,7 @@ yyreduce:
 				if(!SAME_INSTRUCTION)
 				{
 			    	printf("MOV EAX, [%s]\n", (yyvsp[0].name));
+			    	fprintf(yyies, "\tlw\t$t0, %s\n", (yyvsp[0].name));
 			    }
 			    SAME_INSTRUCTION++;
 			}
@@ -2705,11 +2780,11 @@ yyreduce:
 		  YYERROR;
 		}
 	}
-#line 2709 "y.tab.c" /* yacc.c:1646  */
+#line 2784 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2713 "y.tab.c" /* yacc.c:1646  */
+#line 2788 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2944,7 +3019,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1190 "tema2.y" /* yacc.c:1906  */
+#line 1260 "tema2.y" /* yacc.c:1906  */
 
 
 int main()
@@ -2954,6 +3029,11 @@ int main()
 	
 	yyparse();
 	
+	fprintf(yyies, "\tli\t$v0, 10\n\tsyscall\n"); // exit sequence
+	fprintf(yyies, "\t.data\n");
+	ts->printall();
+	fprintf(yyies, "crlf:\t\t\t.asciiz \"\\n\"\n");
+	fprintf(yyies, "\n");
 	fclose(yyies);
 	
 	if(EsteCorecta == 1)
