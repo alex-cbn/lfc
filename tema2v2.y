@@ -405,12 +405,10 @@ INST:
 	|
 	{
 	SAME_INSTRUCTION = 0;
-	SINGLE_EXPRESSION = 1;
 	}
 	I 
 	{
 	SAME_INSTRUCTION = 0;
-	SINGLE_EXPRESSION = 1;
 	}';' INST
 	;
 I : IFDECL %prec ifx
@@ -426,8 +424,7 @@ I : IFDECL %prec ifx
 	|
 	TOK_VARIABLE
 	{
-        SAME_INSTRUCTION = 0;
-        SINGLE_EXPRESSION = 1;
+        SAME_INSTRUCTION = 0;	
 	} '=' E_BFIS
 	{
 		if(ts != NULL)
@@ -479,6 +476,31 @@ I : IFDECL %prec ifx
 		}
 	}
 	|
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_STRING_VALUE
+	{
+	    
+	}
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_INT_VALUE
+	{
+	    
+	}
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_FLOAT_VALUE
+	{
+	    
+	}
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_TRUE
+	{
+	    
+	}
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_FALSE
+	{
+	    
+	}
+	TOK_DATA_TYPE TOK_VARIABLE '=' TOK_VARIABLE
+	{
+	    
+	}
+	|
     TOK_DATA_TYPE TOK_VARIABLE '=' E_BFIS
     {
     SAME_INSTRUCTION = 0;
@@ -506,19 +528,6 @@ I : IFDECL %prec ifx
 	        
 	    	if($4->getType()==1)
 			{
-			    if(SINGLE_EXPRESSION)
-	            {	            
-	                if($4->is_variable)
-	                {
-	                    //printf("MOV EAX, [%s]\n", $4->var_name.c_str());
-	                    fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
-	                }
-	                else
-	                {
-	                    //printf("MOV EAX, %f\n", *(float*)$4->getValue());
-	                    fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
-	                }
-	            }
 			    fprintf(yyies, "\tla\t$t4, %s\n", $2);			
 			    fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
 				ts->setValue($2, *(float*)$4->getValue());
@@ -532,21 +541,9 @@ I : IFDECL %prec ifx
 	    }
 	    if($1==2)
 	    {
+	        
 	    	if($4->getType()==2)
 			{
-			    if(SINGLE_EXPRESSION)
-	            {
-	                if($4->is_variable)
-	                {
-	                    printf("MOV EAX, [%s]\n", $4->var_name.c_str());
-	                    fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
-	                }
-	                else
-	                {
-	                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)$4->getValue());
-	                }
-	            }
 			    printf("MOV [%s], EAX\n", $2);
 	            fprintf(yyies, "\tsw\t$t0, %s\n", $2);
 				ts->setValue($2, *(int*)$4->getValue());
@@ -602,19 +599,6 @@ I : IFDECL %prec ifx
 	        
 	    	if($4->getType()==1)
 			{
-			    if(SINGLE_EXPRESSION)
-	            {	            
-	                if($4->is_variable)
-	                {
-	                    //printf("MOV EAX, [%s]\n", $4->var_name.c_str());
-	                    fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
-	                }
-	                else
-	                {
-	                    //printf("MOV EAX, %f\n", *(float*)$4->getValue());
-	                    fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
-	                }
-	            }
 			    fprintf(yyies, "\tla\t$t4, %s\n", $2);			
 			    fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
 				ts->setValue($2, *(float*)$4->getValue());
@@ -630,19 +614,6 @@ I : IFDECL %prec ifx
 	    {
 	    	if($4->getType()==2)
 			{
-			    if(SINGLE_EXPRESSION)
-	            {
-	                if($4->is_variable)
-	                {
-	                    printf("MOV EAX, [%s]\n", $4->var_name.c_str());
-	                    fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
-	                }
-	                else
-	                {
-	                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)$4->getValue());
-	                }
-	            }
 			    printf("MOV [%s], EAX\n", $2);
 			    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
 				ts->setValue($2, *(int*)$4->getValue());
@@ -980,10 +951,9 @@ TOK_REPEAT B TOK_UNTIL TOK_LEFT BOOLE
 } 
 TOK_RIGHT
 	;
-
 E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 	{
-	    SINGLE_EXPRESSION = 0;
+	printf("\n+\n");
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
 		{
@@ -1025,17 +995,8 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-					    if($1->is_variable ==1)
-					    {
-					        printf("ADD EAX, [%s]\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tlw\t$t1, %s\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
-					    }
-					    else
-					    {
-						    printf("ADD EAX, %d\n", *(int*)$1->getValue());
-    						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
-    					}
+						printf("ADD EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
 					}
 				}
 			}
@@ -1084,8 +1045,6 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
     |
     E_BFIS TOK_MINUS E_BFIS %prec TOK_MINUS
 	{
-	printf("Am pe stanga %s:%d, am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
-		SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
 		{
@@ -1127,17 +1086,8 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-					    if($1->is_variable ==1)
-					    {
-					        printf("SUB EAX, [%s]\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tlw\t$t1, %s\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tsub\t$t0, $t0, $t1\n");
-					    }
-					    else
-					    {
-						    printf("SUB EAX, %d\n", *(int*)$1->getValue());
-    						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)$1->getValue());
-    					}
+						printf("!!SUB EAX, %d\n", *(int*)$3->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, -%d\n", *(int*)$3->getValue());
 					}
 					
 				}
@@ -1187,7 +1137,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
     |
     E_BFIS TOK_MULTIPLY E_BFIS %prec TOK_MULTIPLY
 	{
-		SINGLE_EXPRESSION = 0;
+	printf("\n*\n");
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
 		{
@@ -1199,7 +1149,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 		{
 			if($1->getType()==2)
 			{
-				$$->setValue(*(int*)$1->getValue() * *(int*)$3->getValue());
+				$$->setValue(*(int*)$1->getValue()+*(int*)$3->getValue());
 				if(SAME_INSTRUCTION == 0)
 				{
 					if($1->is_variable==1)
@@ -1223,23 +1173,14 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 				else
 				{
 					if($3->is_in_eax!=1)
-					{					
+					{
 						printf("MUL EAX, %d\n", *(int*)$3->getValue());
 						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$3->getValue());
 					}
 					else
 					{
-					    if($1->is_variable ==1)
-					    {
-					        printf("MUL EAX, [%s]\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tlw\t$t1, %s\n", $1->var_name.c_str());
-					        fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
-					    }
-					    else
-					    {
-						    printf("MUL EAX, %d\n", *(int*)$1->getValue());
-    						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
-    					}
+						printf("MUL EAX, %d\n", *(int*)$1->getValue());
+						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
 					}
 				}
 			}
@@ -1290,7 +1231,6 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
     
     E_BFIS TOK_DIVIDE E_BFIS %prec TOK_DIVIDE
 	{
-	    SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($3->getType()!=1 && $3->getType()!=2)
 		{
@@ -1324,9 +1264,14 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					if($3->is_variable==1)
 					{
-						printf("DIV EAX, [%s]\n", $3->var_name.c_str());
-					    fprintf(yyies, "\tlw\t$t1, %s\n", $3->var_name.c_str());
-					    fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
+						if(var_count % 2 != 0)
+						{
+							printf("DIV EAX, EBX\n");
+						}
+						else
+						{
+							printf("DIV EAX, ECX\n");
+						}
 					}
 					else
 					{
@@ -1335,19 +1280,9 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 							printf("DIV EAX, %d\n", *(int*)$3->getValue());
 						}
 						else
-					    {
-					        if($1->is_variable ==1)
-					        {
-					            printf("DIV EAX, [%s]\n", $1->var_name.c_str());
-					            fprintf(yyies, "\tlw\t$t1, %s\n", $1->var_name.c_str());
-					            fprintf(yyies, "\tadd\t$t0, $t0, $t1\n");
-					        }
-					        else
-					        {
-						        printf("DIV EAX, %d\n", *(int*)$1->getValue());
-        						fprintf(yyies, "\taddi\t$t0, $t0, %d\n", *(int*)$1->getValue());
-        					}
-					    }
+						{
+							printf("!!DIV EAX, %d\n", *(int*)$3->getValue());
+						}
 					}	
 				}
 				else
@@ -1414,7 +1349,6 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 	|
 	TOK_LEFT E_BFIS TOK_RIGHT
 	{
-	    	    SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($2->getType()==0)
 		{
@@ -1437,6 +1371,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 	|
 	TOK_VARIABLE %prec TOK_VARIABLE
 	{
+	printf("\ndoh\n");
 		if(ts != NULL)
 		{
 		if(ts->exists($1) == 1)
@@ -1459,11 +1394,8 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					$$->setValue(*(int*)ts->getValue($1));
 					if(!SAME_INSTRUCTION)
 				    {
-				        if(!SINGLE_EXPRESSION)
-				        {
-			        	    //printf("MOV EAX, [%s]\n", $1);
-			        	    fprintf(yyies, "\tlw\t$t0, %s\n", $1);
-			        	}
+			        	printf("MOV EAX, [%s]\n", $1);
+			        	fprintf(yyies, "\tlw\t$t0, %s\n", $1);
 			        }
 				}
 				if(ts->getType($1)==3)
@@ -1473,7 +1405,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 				$$->is_variable=1;
 				$$->var_name = $1;
 				
-			    //SAME_INSTRUCTION++; DANGEROUS BUG
+			    SAME_INSTRUCTION++;
 			}
 			else
 			{
@@ -1494,15 +1426,12 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 {
     $$ = new GenericValue();
     $$->setValue($1);
-    if(!SAME_INSTRUCTION)  // dispara
-	{
-	    if(!SINGLE_EXPRESSION)
-	    {
-		    printf("MOV EAX, %d\n", $1);
-		    fprintf(yyies, "\tli\t$t0, %d\n", $1);
-		}
-	}
-	SAME_INSTRUCTION++;
+    //if(!SAME_INSTRUCTION)  // dispara
+	//{
+	//	printf("MOV EAX, %d\n", $1);
+	//	fprintf(yyies, "\tli\t$t0, %d\n", $1);
+	//}
+	//SAME_INSTRUCTION++;
 }
 
 	|

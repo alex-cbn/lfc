@@ -74,7 +74,9 @@ extern int yydebug;
     TOK_FALSE = 284,
     TOK_STRING_VALUE = 285,
     TOK_DATA_TYPE = 286,
-    TOK_VARIABLE = 287
+    TOK_VARIABLE = 287,
+    uniexpr = 288,
+    multiexpr = 289
   };
 #endif
 /* Tokens.  */
@@ -108,16 +110,18 @@ extern int yydebug;
 #define TOK_STRING_VALUE 285
 #define TOK_DATA_TYPE 286
 #define TOK_VARIABLE 287
+#define uniexpr 288
+#define multiexpr 289
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 349 "tema2.y" /* yacc.c:1909  */
+#line 354 "tema2.y" /* yacc.c:1909  */
  char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;
 
-#line 121 "y.tab.h" /* yacc.c:1909  */
+#line 125 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

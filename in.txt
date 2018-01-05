@@ -1,14 +1,10 @@
 program kurwa
 begin
-    int m=4;
-    int n=2;
-    m=m-n;
-    if (m > n) then
-        begin
-            print m;
-        end
-    else
-        begin
-            print n;
-        end;
+    int a= 4;
+    int b= 7;
+    int c= 10;
+    int d= a;
+    int m=a+b*c+d;
+    print "AM mai mult de 4 clase";
+    print m;
 end
