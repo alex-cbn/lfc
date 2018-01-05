@@ -1969,7 +1969,7 @@ yyreduce:
 	                else
 	                {
 	                    printf("MOV EAX, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
+	                    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
 	                }
 	            }
 			    printf("MOV [%s], EAX\n", (yyvsp[-2].name));
@@ -2065,7 +2065,7 @@ yyreduce:
 	                else
 	                {
 	                    printf("MOV EAX, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
+	                    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)(yyvsp[0].val_generic)->getValue());
 	                }
 	            }
 			    printf("MOV [%s], EAX\n", (yyvsp[-2].name));
@@ -2541,7 +2541,7 @@ yyreduce:
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -2647,7 +2647,7 @@ yyreduce:
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -2752,7 +2752,7 @@ yyreduce:
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -2868,7 +2868,7 @@ yyreduce:
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)(yyvsp[-2].val_generic)->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}

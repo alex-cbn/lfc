@@ -544,7 +544,7 @@ I : IFDECL %prec ifx
 	                else
 	                {
 	                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)$4->getValue());
+	                    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                }
 	            }
 			    printf("MOV [%s], EAX\n", $2);
@@ -640,7 +640,7 @@ I : IFDECL %prec ifx
 	                else
 	                {
 	                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
-	                    fprintf(yyies, "\tlw\t$t0, %d\n", *(int*)$4->getValue());
+	                    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                }
 	            }
 			    printf("MOV [%s], EAX\n", $2);
@@ -1051,7 +1051,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)$1->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -1154,7 +1154,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)$1->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -1256,7 +1256,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)$1->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
@@ -1370,7 +1370,7 @@ E_BFIS:	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
 					}
 					else
 					{
-						fprintf(yyies, "\tlwc1\t$f0, %f\n", *(float*)$1->getValue());
+						fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 					}
 					SAME_INSTRUCTION = 1;
 				}
