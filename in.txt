@@ -1,6 +1,6 @@
 program kurwa
 begin
-    int mvar= 6 / 2 * ( 1 + 2 );
-    print "AM mai mult de 4 clase";
-    print mvar;
+    int m;
+    m = 6 / 2 * (1 + 2 + (4*5 - 3));
+    print m;
 end

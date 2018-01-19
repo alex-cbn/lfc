@@ -118,7 +118,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 354 "tema2.y" /* yacc.c:1909  */
+#line 356 "tema2.y" /* yacc.c:1909  */
  char* name; bool val_bool;int val_int; float val_float; char* val_string; class GenericValue* val_generic;
 
 #line 125 "y.tab.h" /* yacc.c:1909  */

@@ -1,4 +1,5 @@
-Add float and bool functionality
+brackets
+bool operations
+
 Unary operator -
 Float detection precedence
-bool = BOOLE

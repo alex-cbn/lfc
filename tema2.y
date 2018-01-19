@@ -265,6 +265,10 @@
 			{
 			    fprintf(yyies, ".asciiz %s\n", tmp->val_string);
 			}
+			if(tmp->tip == 0)
+			{
+				fprintf(yyies, ".word 0\n");
+			}
 			tmp = tmp->next;
 		}
 	}
@@ -376,7 +380,6 @@
 	%left TOK_VARIABLE
 	%left TOK_PLUS TOK_MINUS
 	%left TOK_MULTIPLY TOK_DIVIDE
-	%left TOK_LEFT TOK_RIGHT
 %%
 
 S : 
@@ -496,6 +499,21 @@ I :
 		    {
 		    	if($4->getType()==0)
 				{
+				    if(SINGLE_EXPRESSION)
+		            {
+		                if($4->is_variable)
+		                {
+		                    printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+		                    fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+		                }
+		                else
+		                {
+		                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
+		                    fprintf(yyies, "\tli\t$t0, %d\n", (int)*(bool*)$4->getValue());
+		                }
+		            }
+				    printf("MOV [%s], EAX\n", $2);
+		            fprintf(yyies, "\tsw\t$t0, %s\n", $2);
 					ts->setValue($2, *(bool*)$4->getValue());
 				}
 				else
@@ -592,7 +610,22 @@ I :
 		    {
 		    	if($4->getType()==0)
 				{
-					ts->setValue($2, *(bool*)$4->getValue());
+				    if(SINGLE_EXPRESSION)
+		            {
+		                if($4->is_variable)
+		                {
+		                    printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+		                    fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+		                }
+		                else
+		                {
+		                    printf("MOV EAX, %d\n", *(int*)$4->getValue());
+		                    fprintf(yyies, "\tli\t$t0, %d\n", (bool)*(int*)$4->getValue());
+		                }
+		            }
+				    printf("MOV [%s], EAX\n", $2);
+				    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
+					ts->setValue($2, (bool)*(int*)$4->getValue());
 				}
 				else
 				{
@@ -710,32 +743,43 @@ I :
 	        }
 	        else
 	        {
-	        if(ts->getType($2)==3)
-		    {
-			    printf("It's a string! %s\n",*(char**)ts->getValue($2));
-			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
-			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
-		    }
-		    if(ts->getType($2)==2)
-		    {
-			    printf("It's an int! %d\n",*(int*)ts->getValue($2));
-			    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
-			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
-		    }
-		    if(ts->getType($2)==1)
-		    {
-			    printf("It's a float! %g\n",*(float*)ts->getValue($2));
-    	        fprintf(yyies, "\tmov.s\t$f12, $f0\n\tli\t$v0, 2\n\tsyscall\n");
-			    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
-			    
-		    }
-		    if(ts->getType($2)==0)
-		    {
-			    if(*(bool*)ts->getValue($2))
-			    printf("It's a bool! true\n");
-			    else
-			    printf("It's a bool! false\n");
-		    }
+		        if(ts->getType($2)==3)
+			    {
+				    printf("It's a string! %s\n",*(char**)ts->getValue($2));
+				    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 4\n\tsyscall\n");
+				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+			    }
+			    if(ts->getType($2)==2)
+			    {
+				    printf("It's an int! %d\n",*(int*)ts->getValue($2));
+				    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
+				    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
+				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+			    }
+			    if(ts->getType($2)==1)
+			    {
+				    printf("It's a float! %g\n",*(float*)ts->getValue($2));
+				    fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
+	    	        fprintf(yyies, "\tmov.s\t$f12, $f0\n\tli\t$v0, 2\n\tsyscall\n");
+				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+				    
+			    }
+			    if(ts->getType($2)==0)
+			    {
+				    if(*(bool*)ts->getValue($2))
+				    {
+					    printf("It's a bool! true\n");
+					    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "true_value");
+				    	fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+					}
+				    else
+				    {
+				    	printf("It's a bool! false\n");
+					    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "false_value");
+				    	fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+				    }
+				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
+			    }
 	        }
 	      }
 	      else
@@ -813,6 +857,44 @@ IFDECL:
 	        printf("JL BLOCK_%d \n",block_count+2);
 	        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",block_count+2);
 	    }
+
+
+	    if($4==10)// ==
+	    {
+	        printf("JNE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
+	        fprintf(yyies, "\tbc1f\t BLOCK_%d\n",block_count+2);
+	    }
+	    if($4==11)// !=
+	    {
+	        printf("JE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
+	        fprintf(yyies, "\tbc1t\t BLOCK_%d\n",block_count+2);
+	    }
+	    if($4==12)// <
+	    {
+	        printf("JGE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.le.s $f0, $f2\n");
+	        fprintf(yyies, "\tbc1t\t BLOCK_%d\n",block_count+2);
+	    }
+	    if($4==13)// >
+	    {
+	        printf("JLE BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.le.s $f2, $f0\n");
+	        fprintf(yyies, "\tbc1t\t BLOCK_%d\n",block_count+2);
+	    }
+	    if($4==14)// <=
+	    {
+	        printf("JG BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.lt.s $f0, $f2\n");
+	        fprintf(yyies, "\tbc1t\t BLOCK_%d\n",block_count+2);
+	    }
+	    if($4==15)// >=
+	    {
+	        printf("JL BLOCK_%d \n",block_count+2);
+	        fprintf(yyies, "\tc.le.s $f2, $f0\n");
+	        fprintf(yyies, "\tbc1t\t BLOCK_%d\n",block_count+2);
+	    }
 	}TOK_RIGHT TOK_THEN B
 	;
 BOOLE:
@@ -820,30 +902,30 @@ BOOLE:
     {
         if(SINGLE_EXPRESSION)
         {
-                if($1->getType() == 2)
-	                {
-	                    if($1->is_variable)
-	                    {
-	                        printf("MOV EAX, [%s]\n", $1->var_name.c_str());
-	                        fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
-	                    }
-	                    else
-	                    {
-	                        printf("MOV EAX, %d\n", *(int*)$1->getValue());
-	                        fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
-	                    }
-	                }        
-	             if($1->getType() == 1)
-	                {
-	                    if($1->is_variable)
-	                    {
-	                        fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
-	                    }
-	                    else
-	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
-	                    }
-	                }
+	        if($1->getType() == 2)
+		        {
+		            if($1->is_variable)
+		            {
+		                printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+		                fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+		            }
+		            else
+		            {
+		                printf("MOV EAX, %d\n", *(int*)$1->getValue());
+		                fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+		            }
+		        }
+	    	if($1->getType() == 1)
+		        {
+		            if($1->is_variable)
+		            {
+		                fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+		            }
+		            else
+		            {
+		                fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+		            }
+		        }
 	    }
         printf("MOV ECX, EAX\n");
         fprintf(yyies, "\tmove\t$t2, $t0\n");
@@ -869,6 +951,7 @@ BOOLE:
 	                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
 	                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                        }
+	                        $$ = 0;
 	                    }        
 	                 if($4->getType() == 1)
 	                    {
@@ -878,12 +961,12 @@ BOOLE:
 	                        }
 	                        else
 	                        {
-	                            fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
+	                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
 	                        }
+	                        $$ = 10;
 	                    }
 	        }
-		    printf("CMP ECX, EAX\n");
-		    $$ = 0;
+		    printf("CMP ECX, EAX\n");		    
 		}
 		else
 		{
@@ -920,7 +1003,7 @@ BOOLE:
 	                    }
 	                    else
 	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
+	                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 	                    }
 	                }
 	    }
@@ -947,6 +1030,7 @@ BOOLE:
 	                                printf("MOV EAX, %d\n", *(int*)$4->getValue());
 	                                fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                            }
+	                            $$=1;
 	                        }        
 	                     if($4->getType() == 1)
 	                        {
@@ -956,11 +1040,11 @@ BOOLE:
 	                            }
 	                            else
 	                            {
-	                                fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
+	                                fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
 	                            }
+	                            $$=11;
 	                        }
 	            }
-            $$=1;
 		    printf("CMP ECX, EAX\n");
 		}
 		else
@@ -996,7 +1080,7 @@ BOOLE:
 	                    }
 	                    else
 	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
+	                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 	                    }
 	                }
 	    }
@@ -1022,6 +1106,7 @@ BOOLE:
 	                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
 	                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                        }
+	                        $$ = 3;
 	                    }        
 	                 if($4->getType() == 1)
 	                    {
@@ -1031,11 +1116,11 @@ BOOLE:
 	                        }
 	                        else
 	                        {
-	                            fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
+	                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
 	                        }
+	                        $$ = 13;
 	                    }
 	        }
-		    $$=3;
 			printf("CMP ECX, EAX\n");
 		}
 		else
@@ -1071,7 +1156,7 @@ BOOLE:
 	                    }
 	                    else
 	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
+	                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 	                    }
 	                }
 	    }
@@ -1097,6 +1182,7 @@ BOOLE:
 	                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
 	                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                        }
+	                        $$ =2 ;
 	                    }        
 	                 if($4->getType() == 1)
 	                    {
@@ -1106,11 +1192,12 @@ BOOLE:
 	                        }
 	                        else
 	                        {
-	                            fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
+	                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
 	                        }
+	                        $$ =12 ;
 	                    }
 	        }
-		    $$ =2 ;
+		    
 			printf("CMP ECX, EAX\n");
 		}
 		else
@@ -1146,7 +1233,7 @@ BOOLE:
 	                    }
 	                    else
 	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
+	                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 	                    }
 	                }
 	    }
@@ -1158,35 +1245,37 @@ BOOLE:
 	{
 		if($1->getType()==$4->getType())
 		{
-		if(SINGLE_EXPRESSION)
-		{
-			if($4->getType() == 2)
+			if(SINGLE_EXPRESSION)
 			{
-			if($4->is_variable)
-			{
-				printf("MOV EAX, [%s]\n", $4->var_name.c_str());
-				fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+				if($4->getType() == 2)
+				{
+					if($4->is_variable)
+					{
+						printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+						fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+					}
+					else
+					{
+						printf("MOV EAX, %d\n", *(int*)$4->getValue());
+						fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+					}
+					$$ = 4;
+				}
+
+				if($4->getType() == 1)
+				{
+					if($4->is_variable)
+					{
+					    fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+					}
+					else
+					{
+					    fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+					}
+					$$ = 14;
+				}
 			}
-			else
-			{
-				printf("MOV EAX, %d\n", *(int*)$4->getValue());
-				fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
-			}
-			                }        
-			                 if($4->getType() == 1)
-			                    {
-			                        if($4->is_variable)
-			                        {
-			                            fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
-			                        }
-			                        else
-			                        {
-			                            fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
-			                        }
-			                    }
-			        }
-				    $$ = 4;
-					printf("CMP ECX, EAX\n");
+		printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -1221,7 +1310,7 @@ BOOLE:
 	                    }
 	                    else
 	                    {
-	                        fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$1->getValue());
+	                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
 	                    }
 	                }
 	    }
@@ -1247,6 +1336,7 @@ BOOLE:
 	                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
 	                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
 	                        }
+	                        $$ = 5;
 	                    }        
 	                 if($4->getType() == 1)
 	                    {
@@ -1256,11 +1346,11 @@ BOOLE:
 	                        }
 	                        else
 	                        {
-	                            fprintf(yyies, "\tli.s\t$f0, %d\n", *(int*)$4->getValue());
+	                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
 	                        }
+	                        $$ = 15;
 	                    }
-	        }
-		    $$ = 5;
+	        }	           
 			printf("CMP ECX, EAX\n");
 		}
 		else
@@ -1313,10 +1403,9 @@ REPUNTIL:
 	TOK_RIGHT
 	;
 E_BFIS:	
-	E_BFIS TOK_PLUS E_BFIS %prec TOK_PLUS
+	E_BFIS TOK_PLUS E_BFIS
 	{
-		printf("----Vad suma \n");
-		//printf("Am pe stanga %s:%d, am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
+		printf("----Am pe stanga %s:%d + am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
 	    SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
@@ -1408,18 +1497,13 @@ E_BFIS:
 					}
 				}
 			}
-			if($1->getType()==1)
-			{
-				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
-			}
 			$$->is_in_eax=1;
 		}
 	}
     |
-    E_BFIS TOK_MINUS E_BFIS %prec TOK_MINUS
+    E_BFIS TOK_MINUS E_BFIS
 	{
-		//printf("Am pe stanga %s:%d, am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
-		printf("----Vad diferenta\n");
+		printf("----Am pe stanga %s:%d - am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
 		SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
@@ -1479,7 +1563,7 @@ E_BFIS:
 			}
 			if($1->getType()==1)
 			{
-				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
+				$$->setValue(*(float*)$1->getValue() - *(float*)$3->getValue());
 				if(SAME_INSTRUCTION == 0)
 				{
 					if($1->is_variable==1)
@@ -1502,27 +1586,23 @@ E_BFIS:
 				{
 					if($3->is_in_eax!=1)
 					{
-						fprintf(yyies, "\tli.s\t$t5, %f\n", *(float*)$3->getValue());
+						fprintf(yyies, "\tli.s\t$f5, %f\n", *(float*)$3->getValue());
 						fprintf(yyies, "\tsub.s\t$f0, $f0, $f5\n");
 					}
 					else
 					{
-					    fprintf(yyies, "\tli.s\t$t5, %f\n", *(float*)$1->getValue());
+					    fprintf(yyies, "\tli.s\t$f5, %f\n", *(float*)$1->getValue());
 						fprintf(yyies, "\tsub.s\t$f0, $f0, $f5\n");
 					}
 				}
-			}
-			if($1->getType()==1)
-			{
-				$$->setValue(*(float*)$1->getValue()-*(float*)$3->getValue());
 			}
 			$$->is_in_eax=1;
 		}
 	}
     |
-    E_BFIS TOK_MULTIPLY E_BFIS %prec TOK_MULTIPLY
+    E_BFIS TOK_MULTIPLY E_BFIS
 	{
-		printf("----Vad inmultire \n");
+		printf("----Am pe stanga %s:%d * am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
 		SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($1->getType()!=$3->getType())
@@ -1588,7 +1668,7 @@ E_BFIS:
 			
 			if($1->getType()==1)
 			{
-				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
+				$$->setValue(*(float*)$1->getValue() * *(float*)$3->getValue());
 				if(SAME_INSTRUCTION == 0)
 				{
 					if($1->is_variable==1)
@@ -1621,17 +1701,13 @@ E_BFIS:
 					}
 				}
 			}
-			if($1->getType()==1)
-			{
-				$$->setValue(*(float*)$1->getValue() * *(float*)$3->getValue());
-			}
 			$$->is_in_eax=1;
 		}
 	}
     |
-    E_BFIS TOK_DIVIDE E_BFIS %prec TOK_DIVIDE
+    E_BFIS TOK_DIVIDE E_BFIS
 	{
-		printf("----Vad impartire\n");
+		printf("----Am pe stanga %s:%d / am pe dreapta %s:%d\n",$1->var_name.c_str(), *(int*)$1->getValue(), $3->var_name.c_str(), *(int*)$3->getValue());
 	    SINGLE_EXPRESSION = 0;
 		$$ = new GenericValue();
 		if($3->getType()!=1 && $3->getType()!=2)
@@ -1648,69 +1724,79 @@ E_BFIS:
 		}
 		else
 		{
-			    if($1->getType()==2)
+			if($3->getType()==2)
+			{
+				if(*(int*)$3->getValue() == 0)
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
+		  			yyerror(msg);
+		  			YYERROR;
+				}
+			}
+			if($3->getType()==1)
+			{
+				if(*(float*)$3->getValue() == 0)
+				{
+					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
+		  			yyerror(msg);
+		  			YYERROR;
+				}
+			}
+			if($1->getType()==2)
+			{
+			    $$->setValue(*(int*)$1->getValue() / *(int*)$3->getValue());
+			    if(SAME_INSTRUCTION == 0)
 			    {
-				    $$->setValue(*(int*)$1->getValue() * *(int*)$3->getValue());
-				    if(SAME_INSTRUCTION == 0)
+				    if($1->is_variable==1)
 				    {
-					    if($1->is_variable==1)
-					    {
-						    printf("MOV EAX, [%s]\n", $1->var_name.c_str());
-						    fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
-					    }
-					    else
-					    {
-						    printf("MOV EAX, %d\n", *(int*)$1->getValue());
-						    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
-					    }
-					    SAME_INSTRUCTION = 1;
-				    }
-				    if($3->is_variable==1)
-				    {
-					    printf("DIV EAX, [%s]\n", $3->var_name.c_str());
-					    fprintf(yyies, "\tlw\t$t1, %s\n", $3->var_name.c_str());
-					    fprintf(yyies, "\tdiv\t$t0, $t1\n");
-					    fprintf(yyies, "\tmflo\t$t0\n");
+					    printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+					    fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
 				    }
 				    else
 				    {
-					    if($3->is_in_eax!=1)
-					    {					
+					    printf("MOV EAX, %d\n", *(int*)$1->getValue());
+					    fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+				    }
+				    SAME_INSTRUCTION = 1;
+			    }
+				if($3->is_variable==1)
+				{
+				    printf("DIV EAX, [%s]\n", $3->var_name.c_str());
+				    fprintf(yyies, "\tlw\t$t1, %s\n", $3->var_name.c_str());
+				    fprintf(yyies, "\tdiv\t$t0, $t1\n");
+				    fprintf(yyies, "\tmflo\t$t0\n");
+				}
+				else
+				{
+				    if($3->is_in_eax!=1)
+				    {					
 						    printf("DIV EAX, %d\n", *(int*)$3->getValue());
 						    fprintf(yyies, "\tli\t$t1, %d\n", *(int*)$3->getValue());
 						    fprintf(yyies, "\tdiv\t$t0, $t1\n");
 						    fprintf(yyies, "\tmflo\t$t0\n");
-					    }
-					    else
-					    {
+				    }
+				    else
+				    {
 					        if($1->is_variable ==1)
 					        {
 					            printf("DIV EAX, [%s]\n", $1->var_name.c_str());
 					            fprintf(yyies, "\tlw\t$t1, %s\n", $1->var_name.c_str());
 					            fprintf(yyies, "\tdiv\t$t0, $t1\n");
-            					fprintf(yyies, "\tmflo\t$t0\n");
+	            				fprintf(yyies, "\tmflo\t$t0\n");
 					        }
 					        else
 					        {
 						        printf("DIV EAX, %d\n", *(int*)$1->getValue());
-        						fprintf(yyies, "\tli\t$t1, %d\n", *(int*)$1->getValue());
-        						fprintf(yyies, "\tdiv\t$t0, $t1\n");
-            					fprintf(yyies, "\tmflo\t$t0\n");
-        					}
-					    }
+	        					fprintf(yyies, "\tli\t$t1, %d\n", *(int*)$1->getValue());
+	        					fprintf(yyies, "\tdiv\t$t0, $t1\n");
+	            				fprintf(yyies, "\tmflo\t$t0\n");
+	        				}
 				    }
-			    }
-				else
-				{
-					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
-	  				yyerror(msg);
-	  				YYERROR;
 				}
 			}
-			
 		    if($1->getType()==1)
 			{
-				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
+				$$->setValue(*(float*)$1->getValue() / *(float*)$3->getValue());
 				if(SAME_INSTRUCTION == 0)
 				{
 					if($1->is_variable==1)
@@ -1738,34 +1824,20 @@ E_BFIS:
 					}
 					else
 					{
-					    fprintf(yyies, "\tli.s\t$t5, %f\n", *(float*)$1->getValue());
+					    fprintf(yyies, "\tli.s\t$f5, %f\n", *(float*)$1->getValue());
 						fprintf(yyies, "\tdiv.s\t$f0, $f0, $f5\n");
 					}
 				}
 			}
-			
-			if($1->getType()==1)
-			{
-				if(*(float*)$3->getValue() != 0)
-				{
-					$$->setValue(*(float*)$1->getValue() / *(float*)$3->getValue());
-				}
-				else
-				{
-					sprintf(msg,"%d:%d Deliberate division by 0...I'd put you in jail...", @1.first_line, @1.first_column);
-	  				yyerror(msg);
-	  				YYERROR;
-				}
-			}
 			$$->is_in_eax=1;
-			
+			}
 		}
 	|
 	TOK_LEFT
 	{
 		printf("----Vad paranteza deschisa\n");
 	}
-	E_BFIS TOK_RIGHT %prec TOK_LEFT
+	E_BFIS TOK_RIGHT
 	{
 		printf("----Vad paranteza inchisa\n");
 	    SINGLE_EXPRESSION = 0;
@@ -1788,7 +1860,7 @@ E_BFIS:
 		}
 	}
 	|
-	TOK_VARIABLE %prec TOK_VARIABLE
+	TOK_VARIABLE
 	{
 		if(ts != NULL)
 		{
@@ -1890,6 +1962,8 @@ int main()
 		fprintf(yyies, "\t.data\n");
 		ts->printall();
 		fprintf(yyies, "crlf:\t\t\t.asciiz \"\\n\"\n");
+		fprintf(yyies, "true_value:\t\t.asciiz \"True\"\n");
+		fprintf(yyies, "false_value:\t\t.asciiz \"False\"\n");
 		fprintf(yyies, "\n");
 		fclose(yyies);
 		
