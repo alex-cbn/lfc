@@ -18,10 +18,10 @@ begin
                 else
                     begin
                         n = n - m;
-                    end;
+                    end
             end
             until (m== n);
         print "GCD is:";
         print m;
-        end;
+        end
 end

@@ -1,10 +1,6 @@
 program kurwa
 begin
-    int avar= 4;
-    int bvar= 7;
-    int cvar= 10;
-    int dvar= avar;
-    int mvar=avar+bvar*cvar+dvar;
+    int mvar= 6 / 2 * ( 1 + 2 );
     print "AM mai mult de 4 clase";
     print mvar;
 end
