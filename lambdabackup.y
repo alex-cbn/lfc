@@ -399,11 +399,13 @@ S :
     ;
 B : 
 	{
-	    fprintf(yyies, "BLOCK_%d:\n",++block_count);
+		printf("\nBLOCK_%d:\n", ++block_count);
+	    fprintf(yyies, "BLOCK_%d:\n",block_count);
 		block_stack.push(block_count);
 	}
 	TOK_BEGIN INST TOK_END
     {
+		printf("E_BLOCK_%d:\n\n", block_stack.top());
 		fprintf(yyies, "E_BLOCK_%d:\n",block_stack.top());
 		block_stack.pop();
 	}
@@ -411,11 +413,13 @@ B :
 INST: 
 	|
 	{
-	    depth = -1;
+	    SAME_INSTRUCTION = 0;
+	    SINGLE_EXPRESSION = 1;
 	}
 	I 
 	{
-	    depth = -1;
+	    SAME_INSTRUCTION = 0;
+	    SINGLE_EXPRESSION = 1;
 	}
 	';' INST
 	|
@@ -817,21 +821,74 @@ IFDECL:
 BOOLE:
     E_BFIS 
     {
+     //    if(SINGLE_EXPRESSION)
+     //    {
+	    //     if($1->getType() == 2)
+		   //      {
+		   //          if($1->is_variable)
+		   //          {
+		   //              //printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+		   //              fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+		   //          }
+		   //          else
+		   //          {
+		   //              printf("MOV EAX, %d\n", *(int*)$1->getValue());
+		   //              fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+		   //          }
+		   //      }
+	    // 	if($1->getType() == 1)
+		   //      {
+		   //          if($1->is_variable)
+		   //          {
+		   //              fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+		   //          }
+		   //          else
+		   //          {
+		   //              fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+		   //          }
+		   //      }
+	    // }
+     //    printf("MOV ECX, EAX\n");
         fprintf(yyies, "\tmove\t$t2, $t0\n");
+        // SAME_INSTRUCTION = 0;
+        // SINGLE_EXPRESSION = 1;
         depth = -1;
     }
     TOK_EQU E_BFIS
 	{
+	    
 		if($4->getType()==$4->getType())
 		{
-			if($4->getType() == 2)
-			{
-				$$ = 0;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 10;
-			}	    
+		    // if(SINGLE_EXPRESSION)
+      //       {
+      //               if($4->getType() == 2)
+	     //                {
+	     //                    if($4->is_variable)
+	     //                    {
+	     //                        printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+	     //                        fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+	     //                    }
+	     //                    else
+	     //                    {
+	     //                        printf("MOV EAX, %d\n", *(int*)$4->getValue());
+	     //                        fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+	     //                    }
+	     //                    $$ = 0;
+	     //                }        
+	     //             if($4->getType() == 1)
+	     //                {
+	     //                    if($4->is_variable)
+	     //                    {
+	     //                        fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+	     //                    }
+	     //                    else
+	     //                    {
+	     //                        fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+	     //                    }
+	     //                    $$ = 10;
+	     //                }
+	     //    }
+		    // printf("CMP ECX, EAX\n");		    
 		}
 		else
 		{
@@ -839,26 +896,78 @@ BOOLE:
 	  		yyerror(msg);
 	  		YYERROR;
 		}
-		depth = -1;
+		// SINGLE_EXPRESSION = 1;
+		// SAME_INSTRUCTION = 0;
 	}
 	|
 	E_BFIS 
 	{
+	    // if(SINGLE_EXPRESSION)
+     //    {
+     //            if($1->getType() == 2)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+	    //                     fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     printf("MOV EAX, %d\n", *(int*)$1->getValue());
+	    //                     fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+	    //                 }
+	    //             }        
+	    //          if($1->getType() == 1)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+	    //                 }
+	    //             }
+	    // }
+	    // SINGLE_EXPRESSION = 1;
+	    // printf("MOV ECX, EAX\n");
 	    fprintf(yyies, "\tmove\t$t2, $t0\n");
-	    depth = -1;
+	    SAME_INSTRUCTION = 0;
 	}
 	TOK_NEQ E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-			if($4->getType() == 2)
-			{
-				$$ = 1;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 11;
-			}
+		    //  if(SINGLE_EXPRESSION)
+      //           {
+      //                   if($4->getType() == 2)
+	     //                    {
+	     //                        if($4->is_variable)
+	     //                        {
+	     //                            printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+	     //                            fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+	     //                        }
+	     //                        else
+	     //                        {
+	     //                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
+	     //                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+	     //                        }
+	     //                        $$=1;
+	     //                    }        
+	     //                 if($4->getType() == 1)
+	     //                    {
+	     //                        if($4->is_variable)
+	     //                        {
+	     //                            fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+	     //                        }
+	     //                        else
+	     //                        {
+	     //                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+	     //                        }
+	     //                        $$=11;
+	     //                    }
+	     //        }
+		    // printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -866,26 +975,75 @@ BOOLE:
 	  		yyerror(msg);
 	  		YYERROR;
 		}
-		depth = -1;
 	}
 	|
 	E_BFIS
 	{
+	    // if(SINGLE_EXPRESSION)
+     //    {
+     //            if($1->getType() == 2)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+	    //                     fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     printf("MOV EAX, %d\n", *(int*)$1->getValue());
+	    //                     fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+	    //                 }
+	    //             }        
+	    //          if($1->getType() == 1)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+	    //                 }
+	    //             }
+	    // }
+	    // printf("MOV ECX, EAX\n");
 	    fprintf(yyies, "\tmove\t$t2, $t0\n");
-	    depth = -1;
+	    	    // SAME_INSTRUCTION = 0;
 	} 
 	TOK_GTR E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-			if($4->getType() == 2)
-			{
-				$$ = 3;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 13;
-			};
+		 //     if(SINGLE_EXPRESSION)
+   //          {
+   //                  if($4->getType() == 2)
+	  //                   {
+	  //                       if($4->is_variable)
+	  //                       {
+	  //                           printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+	  //                           fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+	  //                       }
+	  //                       else
+	  //                       {
+	  //                           printf("MOV EAX, %d\n", *(int*)$4->getValue());
+	  //                           fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+	  //                       }
+	  //                       $$ = 3;
+	  //                   }        
+	  //                if($4->getType() == 1)
+	  //                   {
+	  //                       if($4->is_variable)
+	  //                       {
+	  //                           fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+	  //                       }
+	  //                       else
+	  //                       {
+	  //                           fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+	  //                       }
+	  //                       $$ = 13;
+	  //                   }
+	  //       }
+			// printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -893,26 +1051,76 @@ BOOLE:
 	  		yyerror(msg);
 	  		YYERROR;
 		}
-		depth = -1;
 	}
 	|
 	E_BFIS
 	{
+	    // if(SINGLE_EXPRESSION)
+     //    {
+     //            if($1->getType() == 2)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+	    //                     fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     printf("MOV EAX, %d\n", *(int*)$1->getValue());
+	    //                     fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+	    //                 }
+	    //             }        
+	    //          if($1->getType() == 1)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+	    //                 }
+	    //             }
+	    // }
+	    // printf("MOV ECX, EAX\n");
 	    fprintf(yyies, "\tmove\t$t2, $t0\n");
-	    depth = -1;
+	    	    // SAME_INSTRUCTION = 0;
 	} 
-	TOK_LSS E_BFIS
+	 TOK_LSS E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-			if($4->getType() == 2)
-			{
-				$$ = 2;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 12;
-			}
+		//      if(SINGLE_EXPRESSION)
+  //           {
+  //                   if($4->getType() == 2)
+	 //                    {
+	 //                        if($4->is_variable)
+	 //                        {
+	 //                            printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+	 //                            fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+	 //                        }
+	 //                        else
+	 //                        {
+	 //                            printf("MOV EAX, %d\n", *(int*)$4->getValue());
+	 //                            fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+	 //                        }
+	 //                        $$ =2 ;
+	 //                    }        
+	 //                 if($4->getType() == 1)
+	 //                    {
+	 //                        if($4->is_variable)
+	 //                        {
+	 //                            fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+	 //                        }
+	 //                        else
+	 //                        {
+	 //                            fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+	 //                        }
+	 //                        $$ =12 ;
+	 //                    }
+	 //        }
+		    
+		// 	printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -920,26 +1128,76 @@ BOOLE:
 	  		yyerror(msg);
 	  		YYERROR;
 		}
-		depth = -1;
 	}
 	|
 	E_BFIS
 	{
+	    // if(SINGLE_EXPRESSION)
+     //    {
+     //            if($1->getType() == 2)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+	    //                     fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     printf("MOV EAX, %d\n", *(int*)$1->getValue());
+	    //                     fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+	    //                 }
+	    //             }        
+	    //          if($1->getType() == 1)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+	    //                 }
+	    //             }
+	    // }
+	    // printf("MOV ECX, EAX\n");
 	    fprintf(yyies, "\tmove\t$t2, $t0\n");
-	    depth = -1;
+	    	    // SAME_INSTRUCTION = 0;
 	} 
 	TOK_LEQ E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-			if($4->getType() == 2)
-			{
-				$$ = 4;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 14;
-			}
+		// 	if(SINGLE_EXPRESSION)
+		// 	{
+		// 		if($4->getType() == 2)
+		// 		{
+		// 			if($4->is_variable)
+		// 			{
+		// 				printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+		// 				fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+		// 			}
+		// 			else
+		// 			{
+		// 				printf("MOV EAX, %d\n", *(int*)$4->getValue());
+		// 				fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+		// 			}
+		// 			$$ = 4;
+		// 		}
+
+		// 		if($4->getType() == 1)
+		// 		{
+		// 			if($4->is_variable)
+		// 			{
+		// 			    fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+		// 			}
+		// 			else
+		// 			{
+		// 			    fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+		// 			}
+		// 			$$ = 14;
+		// 		}
+		// 	}
+		// printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -951,21 +1209,71 @@ BOOLE:
 	|
 	E_BFIS
 	{
+	    // if(SINGLE_EXPRESSION)
+     //    {
+     //            if($1->getType() == 2)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     printf("MOV EAX, [%s]\n", $1->var_name.c_str());
+	    //                     fprintf(yyies, "\tlw\t$t0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     printf("MOV EAX, %d\n", *(int*)$1->getValue());
+	    //                     fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$1->getValue());
+	    //                 }
+	    //             }        
+	    //          if($1->getType() == 1)
+	    //             {
+	    //                 if($1->is_variable)
+	    //                 {
+	    //                     fprintf(yyies, "\tlwc1\t$f0, %s\n", $1->var_name.c_str());
+	    //                 }
+	    //                 else
+	    //                 {
+	    //                     fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$1->getValue());
+	    //                 }
+	    //             }
+	    // }
+	    // printf("MOV ECX, EAX\n");
 	    fprintf(yyies, "\tmove\t$t2, $t0\n");
-		depth = -1;
+	    	    // SAME_INSTRUCTION = 0;
 	} 
 	TOK_GEQ E_BFIS
 	{
 		if($1->getType()==$4->getType())
 		{
-		    if($4->getType() == 2)
-			{
-				$$ = 2;
-			}
-			if($4->getType() == 1)
-			{
-				$$ = 12;
-			}
+		     // if(SINGLE_EXPRESSION)
+   //          {
+   //                  if($4->getType() == 2)
+	  //                   {
+	  //                       if($4->is_variable)
+	  //                       {
+	  //                           printf("MOV EAX, [%s]\n", $4->var_name.c_str());
+	  //                           fprintf(yyies, "\tlw\t$t0, %s\n", $4->var_name.c_str());
+	  //                       }
+	  //                       else
+	  //                       {
+	  //                           printf("MOV EAX, %d\n", *(int*)$4->getValue());
+	  //                           fprintf(yyies, "\tli\t$t0, %d\n", *(int*)$4->getValue());
+	  //                       }
+	  //                       $$ = 5;
+	  //                   }        
+	  //                if($4->getType() == 1)
+	  //                   {
+	  //                       if($4->is_variable)
+	  //                       {
+	  //                           fprintf(yyies, "\tlwc1\t$f0, %s\n", $4->var_name.c_str());
+	  //                       }
+	  //                       else
+	  //                       {
+	  //                           fprintf(yyies, "\tli.s\t$f0, %f\n", *(float*)$4->getValue());
+	  //                       }
+	  //                       $$ = 15;
+	  //                   }
+	  //       }	           
+			// printf("CMP ECX, EAX\n");
 		}
 		else
 		{
@@ -973,7 +1281,6 @@ BOOLE:
 	  		yyerror(msg);
 	  		YYERROR;
 		}
-		depth = -1;
 	}
 	;
 REPUNTIL: 
@@ -985,70 +1292,33 @@ REPUNTIL:
 	{
 		    if($6==0)// ==
 		    {
-		        //printf("JNE BLOCK_%d \n",repeat_stack.top());
+		        printf("JNE BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tbne\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 		    }
 		    if($6==1)// !=
 		    {
-		        //printf("JE BLOCK_%d \n",repeat_stack.top());
+		        printf("JE BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tbeq\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 		    }
 		    if($6==2)// <
 		    {
-		        //printf("JGE BLOCK_%d \n",repeat_stack.top());
+		        printf("JGE BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tbge\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 		    }
 		    if($6==3)// >
 		    {
-		        //printf("JLE BLOCK_%d \n",repeat_stack.top());
+		        printf("JLE BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tble\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 		    }
 		    if($6==4)// <=
 		    {
-		        //printf("JG BLOCK_%d \n",repeat_stack.top());
+		        printf("JG BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tbgt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
 		    }
 		    if($6==5)// >=
 		    {
 		        printf("JL BLOCK_%d \n",repeat_stack.top());
 		        fprintf(yyies, "\tblt\t$t2, $t0, BLOCK_%d\n",repeat_stack.top());
-		    }
-
-		    if($6==10)// ==
-		    {
-		        //printf("JNE BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
-		        fprintf(yyies, "\tbc1f\t BLOCK_%d\n", repeat_stack.top());
-		    }
-		    if($6==11)// !=
-		    {
-		        //printf("JE BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
-		        fprintf(yyies, "\tbc1t\t BLOCK_%d\n", repeat_stack.top());
-		    }
-		    if($6==12)// <
-		    {
-		        //printf("JGE BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.le.s $f0, $f2\n");
-		        fprintf(yyies, "\tbc1t\t BLOCK_%d\n", repeat_stack.top());
-		    }
-		    if($6==13)// >
-		    {
-		        //printf("JLE BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.le.s $f2, $f0\n");
-		        fprintf(yyies, "\tbc1t\t BLOCK_%d\n", repeat_stack.top());
-		    }
-		    if($6==14)// <=
-		    {
-		        //printf("JG BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.lt.s $f0, $f2\n");
-		        fprintf(yyies, "\tbc1t\t BLOCK_%d\n", repeat_stack.top());
-		    }
-		    if($6==15)// >=
-		    {
-		        //printf("JL BLOCK_%d \n",block_count+2);
-		        fprintf(yyies, "\tc.le.s $f2, $f0\n");
-		        fprintf(yyies, "\tbc1t\t BLOCK_%d\n", repeat_stack.top());
 		    }
 		    repeat_stack.pop();
 	} 

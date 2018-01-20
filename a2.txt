@@ -1,0 +1,34 @@
+	.text
+	.globl main
+main:
+BLOCK_1:
+	li	$t0, 6
+	li	$t1, 2
+	div	$t0, $t1
+	mflo	$t0
+	addi	$t0, $t0, 2
+	li	$t1, 5
+	mult	$t0, $t1
+	mflo	$t0
+	addi	$t0, $t0, -3
+	addi	$t0, $t0, 17
+	li	$t1, 20
+	mult	$t0, $t1
+	mflo	$t0
+	sw	$t0, m
+	sw	$t0, m
+	move	$a0, $t0
+	li	$v0, 1
+	syscall
+	la	$a0, crlf
+	li	$v0, 4
+	syscall
+E_BLOCK_1:
+	li	$v0, 10
+	syscall
+	.data
+m:			.word 0
+crlf:			.asciiz "\n"
+true_value:		.asciiz "True"
+false_value:		.asciiz "False"
+

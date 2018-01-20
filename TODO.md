@@ -1,4 +1,3 @@
-brackets
 bool operations
 
 Unary operator -
