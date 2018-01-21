@@ -450,7 +450,7 @@ I :
 					if(ts->getType($1)==1)
 					{
 						ts->setValue($1, *(float*)$4->getValue());
-					    fprintf(yyies, "\tla\t$t4, %s\n", $1);			
+					    fprintf(yyies, "\tla\t$t4, %s\n", $1);
 						fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
 					}
 					if(ts->getType($1)==2)
@@ -1076,7 +1076,19 @@ E_BFIS:
 			{
 				$$->setValue(*(float*)$1->getValue()+*(float*)$3->getValue());
 				fprintf(yyies, "\tadd.s\t$f%d, $f%d, $f%d\n", depth, $1->depth, $3->depth);
-			}			
+			}
+			if($1->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't quite concatenate that for you", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if($1->getType()==0)
+			{
+				sprintf(msg,"%d:%d I am not performing OR instead of addition", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 		}
 	}
     |
@@ -1101,6 +1113,18 @@ E_BFIS:
 			{
 				$$->setValue(*(float*)$1->getValue() - *(float*)$3->getValue());
 				fprintf(yyies, "\tsub.s\t$f%d, $f%d, $f%d\n", depth, $1->depth, $3->depth);
+			}
+			if($1->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't eleminiate a substring from a string", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if($1->getType()==0)
+			{
+				sprintf(msg,"%d:%d I can't substract a boolean value from another", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
 			}
 		}
 	}
@@ -1128,18 +1152,24 @@ E_BFIS:
 				$$->setValue(*(float*)$1->getValue() * *(float*)$3->getValue());
 				fprintf(yyies, "\tmul.s\t$f%d, $f%d, $f%d\n", depth, $1->depth, $3->depth);
 			}
+			if($1->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't multiply 2 strings...call me crazy", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if($1->getType()==0)
+			{
+				sprintf(msg,"%d:%d I am not performing AND instead of multiplication", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 		}
 	}
     |
     E_BFIS TOK_DIVIDE E_BFIS
 	{
 		$$ = new GenericValue();
-		if($3->getType()!=1 && $3->getType()!=2)
-		{
-			sprintf(msg,"%d:%d Did you just tried to divide by a %s", @1.first_line, @1.first_column, types[$3->getType()]);
-	  		yyerror(msg);
-	  		YYERROR;
-		}
 		if($1->getType()!=$3->getType())
 		{
 			sprintf(msg,"%d:%d Type mismatch", @1.first_line, @1.first_column);
@@ -1148,6 +1178,18 @@ E_BFIS:
 		}
 		else
 		{
+			if($1->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't divide 2 strings...call me crazy", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if($1->getType()==0)
+			{
+				sprintf(msg,"%d:%d I don't like dividing boolean values", @1.first_line, @1.first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 			if($3->getType()==2)
 			{
 				if(*(int*)$3->getValue() == 0)
@@ -1224,23 +1266,11 @@ E_BFIS:
 				{
 					$$->setValue(*(float*)ts->getValue($1));
 					fprintf(yyies, "\tlwc1\t$f%d, %s\n", depth, $1);
-					// if(!SAME_INSTRUCTION)
-				 //    {
-			  //       	fprintf(yyies, "\tlwc1\t$f0, %s\n", $1);
-			  //       }
 				}
 				if(ts->getType($1)==2)
 				{
 					$$->setValue(*(int*)ts->getValue($1));
 					fprintf(yyies, "\tlw\t$t%d, %s\n", depth, $1);
-					// if(!SAME_INSTRUCTION)
-				 //    {
-				 //        if(!SINGLE_EXPRESSION)
-				 //        {
-			  //       	    printf("MOV EAX, [%s]\n", $1);
-			  //       	    fprintf(yyies, "\tlw\t$t0, %s\n", $1);
-			  //       	}
-			  //       }
 				}
 				if(ts->getType($1)==3)
 				{
@@ -1248,8 +1278,6 @@ E_BFIS:
 				}
 				$$->is_variable=1;
 				$$->var_name = $1;
-				
-			    //SAME_INSTRUCTION++; //DANGEROUS BUG
 			}
 			else
 			{
@@ -1273,15 +1301,6 @@ E_BFIS:
 	    $$->depth = depth;
 	    $$->setValue($1);
 	    fprintf(yyies, "\tli\t$t%d, %d\n", depth, $1);
-	 	//if(!SAME_INSTRUCTION)  // dispara
-		// {
-		//     if(!SINGLE_EXPRESSION)
-		//     {
-		// 	    printf("MOV EAX, %d\n", $1);
-		// 	    fprintf(yyies, "\tli\t$t0, %d\n", $1);
-		// 	}
-		// }
-		//SAME_INSTRUCTION++;
 	}
 	|
 	TOK_FLOAT_VALUE
@@ -1291,11 +1310,6 @@ E_BFIS:
 		$$->depth = depth;
 		$$->setValue($1);
 		fprintf(yyies, "\tli.s\t$f%d, %f\n", depth, $1);
-		// if(!SAME_INSTRUCTION)
-		// {
-		// 	fprintf(yyies, "\tli.s\t$f0, %f\n", $1);
-		// }
-		//SAME_INSTRUCTION++;
 	}
 	|
 	TOK_STRING_VALUE{$$ = new GenericValue();$$->setValue($1);}

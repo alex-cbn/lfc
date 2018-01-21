@@ -871,8 +871,8 @@ static const yytype_uint16 yyrline[] =
      413,   423,   422,   430,   433,   436,   435,   489,   627,   649,
      717,   732,   732,   741,   746,   741,   819,   818,   846,   845,
      873,   872,   900,   899,   927,   926,   953,   952,   980,   985,
-     980,  1058,  1083,  1108,  1134,  1185,  1184,  1209,  1269,  1287,
-    1301,  1303,  1305
+     980,  1058,  1095,  1132,  1170,  1227,  1226,  1251,  1297,  1306,
+    1315,  1317,  1319
 };
 #endif
 
@@ -1873,7 +1873,7 @@ yyreduce:
 					if(ts->getType((yyvsp[-3].name))==1)
 					{
 						ts->setValue((yyvsp[-3].name), *(float*)(yyvsp[0].val_generic)->getValue());
-					    fprintf(yyies, "\tla\t$t4, %s\n", (yyvsp[-3].name));			
+					    fprintf(yyies, "\tla\t$t4, %s\n", (yyvsp[-3].name));
 						fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
 					}
 					if(ts->getType((yyvsp[-3].name))==2)
@@ -2568,14 +2568,26 @@ yyreduce:
 			{
 				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue()+*(float*)(yyvsp[0].val_generic)->getValue());
 				fprintf(yyies, "\tadd.s\t$f%d, $f%d, $f%d\n", depth, (yyvsp[-2].val_generic)->depth, (yyvsp[0].val_generic)->depth);
-			}			
+			}
+			if((yyvsp[-2].val_generic)->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't quite concatenate that for you", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if((yyvsp[-2].val_generic)->getType()==0)
+			{
+				sprintf(msg,"%d:%d I am not performing OR instead of addition", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 		}
 	}
-#line 2575 "y.tab.c" /* yacc.c:1646  */
+#line 2587 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 1084 "tema2.y" /* yacc.c:1646  */
+#line 1096 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
@@ -2597,13 +2609,25 @@ yyreduce:
 				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue() - *(float*)(yyvsp[0].val_generic)->getValue());
 				fprintf(yyies, "\tsub.s\t$f%d, $f%d, $f%d\n", depth, (yyvsp[-2].val_generic)->depth, (yyvsp[0].val_generic)->depth);
 			}
+			if((yyvsp[-2].val_generic)->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't eleminiate a substring from a string", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if((yyvsp[-2].val_generic)->getType()==0)
+			{
+				sprintf(msg,"%d:%d I can't substract a boolean value from another", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 		}
 	}
-#line 2603 "y.tab.c" /* yacc.c:1646  */
+#line 2627 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 1109 "tema2.y" /* yacc.c:1646  */
+#line 1133 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
@@ -2626,21 +2650,27 @@ yyreduce:
 				(yyval.val_generic)->setValue(*(float*)(yyvsp[-2].val_generic)->getValue() * *(float*)(yyvsp[0].val_generic)->getValue());
 				fprintf(yyies, "\tmul.s\t$f%d, $f%d, $f%d\n", depth, (yyvsp[-2].val_generic)->depth, (yyvsp[0].val_generic)->depth);
 			}
+			if((yyvsp[-2].val_generic)->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't multiply 2 strings...call me crazy", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if((yyvsp[-2].val_generic)->getType()==0)
+			{
+				sprintf(msg,"%d:%d I am not performing AND instead of multiplication", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 		}
 	}
-#line 2632 "y.tab.c" /* yacc.c:1646  */
+#line 2668 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 1135 "tema2.y" /* yacc.c:1646  */
+#line 1171 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
-		if((yyvsp[0].val_generic)->getType()!=1 && (yyvsp[0].val_generic)->getType()!=2)
-		{
-			sprintf(msg,"%d:%d Did you just tried to divide by a %s", (yylsp[-2]).first_line, (yylsp[-2]).first_column, types[(yyvsp[0].val_generic)->getType()]);
-	  		yyerror(msg);
-	  		YYERROR;
-		}
 		if((yyvsp[-2].val_generic)->getType()!=(yyvsp[0].val_generic)->getType())
 		{
 			sprintf(msg,"%d:%d Type mismatch", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
@@ -2649,6 +2679,18 @@ yyreduce:
 		}
 		else
 		{
+			if((yyvsp[-2].val_generic)->getType()==3)
+			{
+				sprintf(msg,"%d:%d I can't divide 2 strings...call me crazy", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
+			if((yyvsp[-2].val_generic)->getType()==0)
+			{
+				sprintf(msg,"%d:%d I don't like dividing boolean values", (yylsp[-2]).first_line, (yylsp[-2]).first_column);
+	  			yyerror(msg);
+	  			YYERROR;
+			}
 			if((yyvsp[0].val_generic)->getType()==2)
 			{
 				if(*(int*)(yyvsp[0].val_generic)->getValue() == 0)
@@ -2681,18 +2723,18 @@ yyreduce:
 			}
 		}
 	}
-#line 2685 "y.tab.c" /* yacc.c:1646  */
+#line 2727 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 1185 "tema2.y" /* yacc.c:1646  */
+#line 1227 "tema2.y" /* yacc.c:1646  */
     {
 	}
-#line 2692 "y.tab.c" /* yacc.c:1646  */
+#line 2734 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 1188 "tema2.y" /* yacc.c:1646  */
+#line 1230 "tema2.y" /* yacc.c:1646  */
     {
 		(yyval.val_generic) = new GenericValue();
 		(yyval.val_generic)->depth = (yyvsp[-1].val_generic)->depth;
@@ -2713,11 +2755,11 @@ yyreduce:
 			(yyval.val_generic)->setValue(*(char**)(yyvsp[-1].val_generic)->getValue());
 		}	
 	}
-#line 2717 "y.tab.c" /* yacc.c:1646  */
+#line 2759 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 1210 "tema2.y" /* yacc.c:1646  */
+#line 1252 "tema2.y" /* yacc.c:1646  */
     {
 		depth++;
 		if(ts != NULL)
@@ -2735,23 +2777,11 @@ yyreduce:
 				{
 					(yyval.val_generic)->setValue(*(float*)ts->getValue((yyvsp[0].name)));
 					fprintf(yyies, "\tlwc1\t$f%d, %s\n", depth, (yyvsp[0].name));
-					// if(!SAME_INSTRUCTION)
-				 //    {
-			  //       	fprintf(yyies, "\tlwc1\t$f0, %s\n", $1);
-			  //       }
 				}
 				if(ts->getType((yyvsp[0].name))==2)
 				{
 					(yyval.val_generic)->setValue(*(int*)ts->getValue((yyvsp[0].name)));
 					fprintf(yyies, "\tlw\t$t%d, %s\n", depth, (yyvsp[0].name));
-					// if(!SAME_INSTRUCTION)
-				 //    {
-				 //        if(!SINGLE_EXPRESSION)
-				 //        {
-			  //       	    printf("MOV EAX, [%s]\n", $1);
-			  //       	    fprintf(yyies, "\tlw\t$t0, %s\n", $1);
-			  //       	}
-			  //       }
 				}
 				if(ts->getType((yyvsp[0].name))==3)
 				{
@@ -2759,8 +2789,6 @@ yyreduce:
 				}
 				(yyval.val_generic)->is_variable=1;
 				(yyval.val_generic)->var_name = (yyvsp[0].name);
-				
-			    //SAME_INSTRUCTION++; //DANGEROUS BUG
 			}
 			else
 			{
@@ -2776,67 +2804,53 @@ yyreduce:
 		  YYERROR;
 		}
 	}
-#line 2780 "y.tab.c" /* yacc.c:1646  */
+#line 2808 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 1270 "tema2.y" /* yacc.c:1646  */
+#line 1298 "tema2.y" /* yacc.c:1646  */
     {
 		depth++;
 	    (yyval.val_generic) = new GenericValue();
 	    (yyval.val_generic)->depth = depth;
 	    (yyval.val_generic)->setValue((yyvsp[0].val_int));
 	    fprintf(yyies, "\tli\t$t%d, %d\n", depth, (yyvsp[0].val_int));
-	 	//if(!SAME_INSTRUCTION)  // dispara
-		// {
-		//     if(!SINGLE_EXPRESSION)
-		//     {
-		// 	    printf("MOV EAX, %d\n", $1);
-		// 	    fprintf(yyies, "\tli\t$t0, %d\n", $1);
-		// 	}
-		// }
-		//SAME_INSTRUCTION++;
 	}
-#line 2801 "y.tab.c" /* yacc.c:1646  */
+#line 2820 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 1288 "tema2.y" /* yacc.c:1646  */
+#line 1307 "tema2.y" /* yacc.c:1646  */
     {
 		depth++;
 		(yyval.val_generic) = new GenericValue();
 		(yyval.val_generic)->depth = depth;
 		(yyval.val_generic)->setValue((yyvsp[0].val_float));
 		fprintf(yyies, "\tli.s\t$f%d, %f\n", depth, (yyvsp[0].val_float));
-		// if(!SAME_INSTRUCTION)
-		// {
-		// 	fprintf(yyies, "\tli.s\t$f0, %f\n", $1);
-		// }
-		//SAME_INSTRUCTION++;
 	}
-#line 2818 "y.tab.c" /* yacc.c:1646  */
+#line 2832 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 1301 "tema2.y" /* yacc.c:1646  */
+#line 1315 "tema2.y" /* yacc.c:1646  */
     {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue((yyvsp[0].val_string));}
-#line 2824 "y.tab.c" /* yacc.c:1646  */
+#line 2838 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 1303 "tema2.y" /* yacc.c:1646  */
+#line 1317 "tema2.y" /* yacc.c:1646  */
     {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(true);}
-#line 2830 "y.tab.c" /* yacc.c:1646  */
+#line 2844 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 1305 "tema2.y" /* yacc.c:1646  */
+#line 1319 "tema2.y" /* yacc.c:1646  */
     {(yyval.val_generic) = new GenericValue();(yyval.val_generic)->setValue(false);}
-#line 2836 "y.tab.c" /* yacc.c:1646  */
+#line 2850 "y.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2840 "y.tab.c" /* yacc.c:1646  */
+#line 2854 "y.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -3071,7 +3085,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1309 "tema2.y" /* yacc.c:1906  */
+#line 1323 "tema2.y" /* yacc.c:1906  */
 
 
 int main()
