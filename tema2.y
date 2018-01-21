@@ -11,6 +11,7 @@
 	int SAME_INSTRUCTION = 0;
 	int block_count = 0;
 	int repeat_count = 0;
+	int bool_count  =0;
 	int var_count = 0;
 	int string_count = 0;
 
@@ -432,41 +433,134 @@ INST:
 I : 
 	REPUNTIL
 	|
-	TOK_VARIABLE
-	{
-	} 
-	'=' E_BFIS
+	TOK_VARIABLE '=' E_BFIS
 	{
 		if(ts != NULL)
 		{
 			if(ts->exists($1) == 1)
 		  	{
-		  		if(ts->getType($1)==$4->getType())
+		  		if(ts->getType($1)==$3->getType())
 				{
 					if(ts->getType($1)==0)
 					{
-						ts->setValue($1, *(bool*)$4->getValue());
+						ts->setValue($1, *(bool*)$3->getValue());
 					}
 					if(ts->getType($1)==1)
 					{
-						ts->setValue($1, *(float*)$4->getValue());
+						ts->setValue($1, *(float*)$3->getValue());
 					    fprintf(yyies, "\tla\t$t4, %s\n", $1);
 						fprintf(yyies, "\tswc1\t$f0, 0($t4)\n");
 					}
 					if(ts->getType($1)==2)
 					{
-						ts->setValue($1, *(int*)$4->getValue());
+						ts->setValue($1, *(int*)$3->getValue());
 						fprintf(yyies, "\tsw\t$t0, %s\n", $1);
 					}
 					if(ts->getType($1)==3)
 					{
-						ts->setValue($1, *(char**)$4->getValue());
+						ts->setValue($1, *(char**)$3->getValue());
 					}
 					depth = -1;
 				}
 				else
 				{
-					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip %s", @1.first_line, @1.first_column, $1, types[ts->getType($1)], types[$4->getType()]);
+					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip %s", @1.first_line, @1.first_column, $1, types[ts->getType($1)], types[$3->getType()]);
+					yyerror(msg);
+					YYERROR;
+				}					
+		  	}
+			else
+			{
+				sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+				yyerror(msg);
+				YYERROR;
+			}
+		}
+		else
+		{
+			sprintf(msg,"%d:%d Eroare semantica: Variabila %s este utilizata fara sa fi fost declarata!", @1.first_line, @1.first_column, $1);
+			yyerror(msg);
+			YYERROR;
+		}
+	}
+	|
+	TOK_VARIABLE '=' BOOLE
+	{
+		if(ts != NULL)
+		{
+			if(ts->exists($1) == 1)
+		  	{
+		  		if(ts->getType($1)==0)
+				{
+					bool_count++;
+					ts->setValue($1, true);
+					if($3==0)// ==
+				    {
+				        fprintf(yyies, "\tbne\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+				    if($3==1)// !=
+				    {
+				        fprintf(yyies, "\tbeq\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+				    if($3==2)// <
+				    {
+				        fprintf(yyies, "\tbge\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+				    if($3==3)// >
+				    {
+				        fprintf(yyies, "\tble\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+				    if($3==4)// <=
+				    {
+				        fprintf(yyies, "\tbgt\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+				    if($3==5)// >=
+				    {
+				        fprintf(yyies, "\tblt\t$t2, $t0, cgif%d\n", bool_count);
+				    }
+
+
+				    if($3==10)// ==
+				    {
+				        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
+				        fprintf(yyies, "\tbc1f\t cgif%d\n",bool_count);
+				    }
+				    if($3==11)// !=
+				    {
+				        fprintf(yyies, "\tc.eq.s $f2, $f0\n");
+				        fprintf(yyies, "\tbc1t\t cgif%d\n",bool_count);
+				    }
+				    if($3==12)// <
+				    {
+				        fprintf(yyies, "\tc.le.s $f0, $f2\n");
+				        fprintf(yyies, "\tbc1t\t cgif%d\n",bool_count);
+				    }
+				    if($3==13)// >
+				    {
+				        fprintf(yyies, "\tc.le.s $f2, $f0\n");
+				        fprintf(yyies, "\tbc1t\t cgif%d\n",bool_count);
+				    }
+				    if($3==14)// <=
+				    {
+				        fprintf(yyies, "\tc.lt.s $f0, $f2\n");
+				        fprintf(yyies, "\tbc1t\t cgif%d\n",bool_count);
+				    }
+				    if($3==15)// >=
+				    {
+				        fprintf(yyies, "\tc.le.s $f2, $f0\n");
+				        fprintf(yyies, "\tbc1t\t cgif%d\n",bool_count);
+					}
+					fprintf(yyies, "\tli $t0, 1\n");
+					fprintf(yyies, "\tb cgif%d\n", bool_count+1);
+					fprintf(yyies, "cgif%d:\n", bool_count);
+					fprintf(yyies, "\tli $t0, 0\n");
+					fprintf(yyies, "cgif%d:\n", ++bool_count);
+					block_count++;
+					fprintf(yyies, "\tlw $t0, %s\n", $1);
+				}
+				else
+				{
+					sprintf(msg,"%d:%d Eroare semantica: Variabilei %s (de tip %s) nu i se poate atribui o valoare de tip boolean", @1.first_line, @1.first_column, $1, types[ts->getType($1)]);
 					yyerror(msg);
 					YYERROR;
 				}					
@@ -669,7 +763,7 @@ I :
 			    if(ts->getType($2)==2)
 			    {
 				    printf("It's an int! %d\n",*(int*)ts->getValue($2));
-				    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
+				    fprintf(yyies, "\tlw\t$t0, %s\n", $2);
 				    fprintf(yyies, "\tmove\t$a0, $t0\n\tli\t$v0, 1\n\tsyscall\n");
 				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
 			    }
@@ -686,15 +780,20 @@ I :
 				    if(*(bool*)ts->getValue($2))
 				    {
 					    printf("It's a bool! true\n");
-					    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "true_value");
-				    	fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
 					}
 				    else
 				    {
 				    	printf("It's a bool! false\n");
-					    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "false_value");
-				    	fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
 				    }
+				    bool_count++;
+				    fprintf(yyies, "\tsw\t$t0, %s\n", $2);
+				    fprintf(yyies, "\tbgtz\t$t0, cgif%d\n", bool_count);
+				    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "false_value");
+					fprintf(yyies, "\tb cgif%d\n", bool_count + 1);
+					fprintf(yyies, "cgif%d:\n", bool_count);
+				    fprintf(yyies, "\tla\t$a0, %s\n\tli\t$v0, 4\n\tsyscall\n", "true_value");
+				    fprintf(yyies, "cgif%d:\n", ++bool_count);
+				    bool_count++;
 				    fprintf(yyies, "\tla\t$a0, crlf\n\tli\t$v0, 4\n\tsyscall\n");
 			    }
 	        }

@@ -1,0 +1,15 @@
+program bleat
+begin
+    int m=3;
+    int n=4;
+    print m;
+    m=n;
+    if(n+9+m != m+5-2+m+1) then 
+    begin
+    print "True";
+    end
+    else
+    begin
+    print "False";
+    end
+end

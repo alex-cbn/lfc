@@ -1,0 +1,6 @@
+program kam
+begin
+    int m=4;
+    m=6 / 2 * (1 + 2 + (4*5 - 3));
+    print m;
+end
